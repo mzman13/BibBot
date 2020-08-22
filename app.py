@@ -1,10 +1,10 @@
-import random
+import random, os
 from flask import Flask, request
 from pymessenger.bot import Bot
 
 app = Flask(__name__)
-ACCESS_TOKEN = 'b79b7f4a-e423-11ea-98d2-f629264cff61'
-VERIFY_TOKEN = 'cf85f164-e424-11ea-a419-f629264cff61'
+ACCESS_TOKEN = os.environ['ACCESS_TOKEN']
+VERIFY_TOKEN = os.environ['VERIFY_TOKEN']
 bot = Bot(ACCESS_TOKEN)
 
 
