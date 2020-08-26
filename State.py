@@ -2,11 +2,11 @@ class State:
     def __init__(self):
         self.transitions = None
 
-    def run(self):
+    def run(self, event):
         assert 0, "run not implemented"
 
-    def next(self, input):
-        if input in self.transitions:
-            return self.transitions[input]
+    def next(self, event):
+        if event in self.transitions:
+            return self.transitions[event]
         else:
             raise Exception("Input not supported for current state")

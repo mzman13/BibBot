@@ -3,6 +3,6 @@ class StateMachine:
         self.currentState = initialState
         # self.currentState.run()
 
-    def process(self, message):
-        self.currentState = self.currentState.next(message)
+    def process(self, event):
+        self.currentState = self.currentState.next(event)
         self.currentState.run()

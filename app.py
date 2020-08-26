@@ -45,6 +45,9 @@ if __name__ == '__main__':
     app.run()
 
 
-# TODO: why take so long to process first message?
+# TODO: why take so long to process first message? - usually when there is unprocessed message by user
 # why sending multiple POST requests per message? - watermark post request
-# TODO: how to pass information between states? context object in stateMachine to be passed around
+# how to pass information between states? context object in stateMachine to be passed around
+# TODO: starting chp > max chapters?
+# TODO: separate initial state from menu state
+# TODO: update current book/chp every night
