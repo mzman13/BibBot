@@ -1,4 +1,4 @@
-import os, time
+import os, time, logging, sys
 from flask import Flask, request
 from pymessenger.bot import Bot
 from Planner import Planner
@@ -8,7 +8,19 @@ app = Flask(__name__)
 ACCESS_TOKEN = os.environ['ACCESS_TOKEN']
 VERIFY_TOKEN = os.environ['VERIFY_TOKEN']
 users = {}
-# print(f"bot start up {time.time() - startTime}")
+print(f"bot start up {time.time() - startTime}")
+sys.stdout.flush()
+
+testLogger = logging.getLogger('testlogger')
+formatter = logging.Formatter('%(levelname)s: %(message)s')
+stdoutHandler = logging.StreamHandler()
+stdoutHandler.setFormatter(formatter)
+testLogger.addHandler(stdoutHandler)
+testLogger.setLevel(logging.INFO)
+testLogger.info("this is test #2")
+
+logger = logging.getLogger('gunicorn.error')
+logger.info("This is test")
 
 def verify_fb_token(token_sent):
     # take token sent by facebook and verify it matches the verify token you sent
