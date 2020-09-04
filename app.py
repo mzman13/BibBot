@@ -15,7 +15,7 @@ stdoutHandler = logging.StreamHandler()
 stdoutHandler.setFormatter(formatter)
 logger.addHandler(stdoutHandler)
 logger.setLevel(logging.INFO)
-logger.info(f"bot start up {time.time() - startTime}")
+# logger.info(f"bot start up {time.time() - startTime}")
 
 def verify_fb_token(token_sent):
     # take token sent by facebook and verify it matches the verify token you sent
@@ -44,7 +44,6 @@ def receive_message():
                     recipient_id = message['sender']['id']
                     if recipient_id not in users:
                         users[recipient_id] = Planner(Bot(ACCESS_TOKEN), logger)
-                    logger.info(users)
                     messageText = message['message'].get('text')
                     try:
                         users[recipient_id].process((messageText, recipient_id,))
