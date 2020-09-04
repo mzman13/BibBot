@@ -1,6 +1,7 @@
 class State:
     def __init__(self):
         self.transitions = None
+        self.lastState = False
 
     def run(self, event):
         assert 0, "run not implemented"

@@ -3,12 +3,16 @@ from datetime import datetime
 from State import State
 from StateMachine import StateMachine
 from Bible import bible
+from PlannerContext import PlannerContext
 
 
 class Welcome(State):
     def run(self, event):
-        response = "Hi, Welcome to BibBot! I hope I can help you to read the bible every day!"
-        return response
+        plannerContext = event[2]
+        response = "Hi, I'm BibBot! Your personal bible reading assistant!\n" \
+                   "I hope I can help you to read the bible every day :)\n\n" \
+                   "First, let's start tracking a new reading plan. Type in 1 to select the first option"
+        plannerContext.bot.send_text_message(event[1], response)
 
     def next(self, event):
         message = event[0]
@@ -19,19 +23,27 @@ class Welcome(State):
 
 class Menu(State):
     def run(self, event):
-        response = "Please enter the number for the option you want.\n"\
-           "1) Start New Reading Plan\n"\
-           "2) Get Today's Reading\n"\
-           "3) Get Yesterday's Reading\n"\
-           "4) Get Tomorrow's Reading"
+        plannerContext = event[2]
+        eight = '8' + u'\u2060' + ')'
+        response = "How can I help you?\n(Please enter the number for the option you want)\n"\
+                   "1) Start New Reading Plan\n" \
+                   "2) Get Today's Reading\n" \
+                   "3) Get Tomorrow's Reading\n" \
+                   "4) Missed Today's Reading?\n" \
+                   "5) Get End Date\n" \
+                   f"{eight} (TBD) Tell me a random bible verse!\n"
+                    # "6) (TBD) Set/Update a Reminder\n" \
+                    # "7) (TBD) Delete Reminder\n" \
+        plannerContext.bot.send_text_message(event[1], response)
         return response
 
     def next(self, event):
         self.transitions = {
             '1': Planner.startPlan,
             '2': Planner.todayReading,
-            '3': Planner.yesterdayReading,
-            '4': Planner.tomorrowReading
+            '3': Planner.tomorrowReading,
+            '4': Planner.missedReading,
+            '5': Planner.endDate
         }
         message = event[0]
         if message not in self.transitions:
@@ -40,38 +52,50 @@ class Menu(State):
             }
         return State.next(self, message)
 
-class Invalid(State):
-    def run(self, event):
-        response = "Sorry, I could not process your message. Please try again"
-        return response
-
-    def next(self, event):
-        return None
-
 class startPlan(State):
     def run(self, event):
-        response = "What Book and Chapter are you starting on? (Format should be Book Chp#)"
+        plannerContext = event[2]
+        response = "What Book and Chapter are you starting on?\n(Format should be BookName Chp#)\n" \
+                   "To go back, type back"
+        plannerContext.bot.send_text_message(event[1], response)
         return response
 
     def next(self, event):
         message = event[0].lower()
         plannerContext = event[2]
+        returnCode = 0
         if re.match(r"^\w+ \d+$", message):
-            plannerContext.currentBook = message.split(' ')[0]
-            plannerContext.currentChp = int(message.split(' ')[1])
-            message = 1
+            messageValues = message.split(' ')
+            # check if book name in bible or if starting chp is <= book's # of chapters
+            if messageValues[0] in bible and int(messageValues[1]) <= bible[messageValues[0]]['chapters']:
+                plannerContext.currentBook = messageValues[0]
+                plannerContext.currentChp = int(messageValues[1])
+                plannerContext.nextBook = None
+                plannerContext.nextChp = None
+                returnCode = 1
+            elif messageValues[0] not in bible:
+                response = "Sorry, I couldn't find the name of the book you wanted. Did you misspell it?"
+                plannerContext.bot.send_text_message(event[1], response)
+            elif int(messageValues[1]) > bible[messageValues[0]]['chapters']:
+                response = f"Sorry, your starting chapter is more than the number of chapters in {messageValues[0]}. Please enter a starting chapter less than {bible[messageValues[0]]['chapters']}"
+                plannerContext.bot.send_text_message(event[1], response)
+        elif message == 'back':
+            pass
         else:
-            message = 0
+            response = "Sorry, I couldn't understand your response, Please make sure your response follows the format of BookName Chapter#"
+            plannerContext.bot.send_text_message(event[1], response)
 
         self.transitions = {
-            0: Planner.invalid,
+            0: Planner.menu,
             1: Planner.getReadingRate
         }
-        return State.next(self, message)
+        return State.next(self, returnCode)
 
 class getReadingRate(State):
     def run(self, event):
+        plannerContext = event[2]
         response = "How many chapters will you read a day?"
+        plannerContext.bot.send_text_message(event[1], response)
         return response
 
     def next(self, event):
@@ -79,107 +103,162 @@ class getReadingRate(State):
         plannerContext = event[2]
         if re.match(r"^\d+$", message.lower()):
             message = int(message)
-            plannerContext.readingRate = message - 1  # inclusive start, ex: [50, 52]
-            plannerContext.setCurrentReading()
-            plannerContext.today = datetime.date(datetime.now())
-            message = 1
+            if message > 1189 or message < 1:
+                response = "Sorry, Please enter a number between 1 to 1189!"
+                plannerContext.bot.send_text_message(event[1], response)
+                plannerContext.reset()
+                message = 0
+            else:
+                plannerContext.readingRate = message  # inclusive start, ex: [50, 52]
+                plannerContext.setCurrentReading()
+                plannerContext.today = datetime.date(datetime.now())
+                message = 1
         else:
+            response = "Sorry, I couldn't understand your response! Please enter a number without commas!"
+            plannerContext.bot.send_text_message(event[1], response)
+            plannerContext.reset()
             message = 0
 
         self.transitions = {
-            0: Planner.invalid,
+            0: Planner.menu,
             1: Planner.planCreated
         }
         return State.next(self, message)
 
 class planCreated(State):
+    def __init__(self):
+        self.lastState = True
+
     def run(self, event):
         plannerContext = event[2]
-        response = f"Got it! Starting from {plannerContext.currentBook} {plannerContext.currentChp}, the goal is to read {plannerContext.readingRate + 1} chapters every day!"
+        response = f"Got it! Starting from {plannerContext.currentBook.title()} {plannerContext.currentChp}, the goal is to read {plannerContext.readingRate} chapters every day!\n\n{plannerContext.getTodayReading()}"
+        plannerContext.updateToday()
+        plannerContext.bot.send_text_message(event[1], response)
         return response
 
     def next(self, event):
         return None
 
 class todayReading(State):
+    def __init__(self):
+        self.lastState = True
+
     def run(self, event):
         plannerContext = event[2]
         plannerContext.updateToday()
-        response = f"{plannerContext.currentBook} {plannerContext.currentChp} to {plannerContext.nextBook} {plannerContext.nextChp}"
-        return response
-
-    def next(self, event):
-        return None
-
-class yesterdayReading(State):
-    def run(self, event):
-        response = "2nd Chronicles 26 - 34"
+        if plannerContext.nextChp:
+            response = plannerContext.getTodayReading()
+        else:
+            response = "No reading plan found!\nPlease start a new reading plan!"
+        plannerContext.bot.send_text_message(event[1], response)
         return response
 
     def next(self, event):
         return None
 
 class tomorrowReading(State):
+    def __init__(self):
+        self.lastState = True
+
     def run(self, event):
-        response = "Ezra 5 -10"
+        plannerContext = event[2]
+        plannerContext.updateToday()
+        if plannerContext.nextChp:
+            response = plannerContext.getTomorrowReading()
+        else:
+            response = "No reading plan found!\nPlease start a new reading plan!"
+        plannerContext.bot.send_text_message(event[1], response)
         return response
 
     def next(self, event):
         return None
 
-class PlannerContext:
+class endDate(State):
     def __init__(self):
-        self.readingRate = None
-        self.currentBook = None
-        self.currentChp = None
-        self.nextBook = None
-        self.nextChp = None
-        self.today = None
-        self.yesterday = None
-        self.tomorrow = None
+        self.lastState = True
 
-    def updateToday(self):
-        if datetime.date(datetime.now()) > self.today:
-            self.today = datetime.date(datetime.now())
-            self.setCurrentReading()
-
-    def setCurrentReading(self):
-        if self.currentChp + self.readingRate > bible[self.currentBook]['chapters']:
-            self.nextBook = bible[self.currentBook]['next']
-            self.nextChp = (self.currentChp + self.readingRate) % bible[self.currentBook]['chapters']
+    def run(self, event):
+        plannerContext = event[2]
+        plannerContext.updateToday()
+        if plannerContext.nextChp:
+            response = plannerContext.getEndDateRemainingChps()
         else:
-            self.nextBook = self.currentBook
-            self.nextChp = self.currentChp + self.readingRate
+            response = "No reading plan found!\nPlease start a new reading plan!"
+        plannerContext.bot.send_text_message(event[1], response)
+        return response
+
+    def next(self, event):
+        return None
+
+class missedReading(State):
+    def run(self, event):
+        self.lastState = False
+        plannerContext = event[2]
+        if not plannerContext.nextChp:
+            response = "No reading plan found!\nPlease start a new reading plan"
+            self.lastState = True
+        else:
+            response = "How many chapters did you read today?\n" \
+                       "To go back, type back"
+        plannerContext.bot.send_text_message(event[1], response)
+        return response
+
+    def next(self, event):
+        message = event[0]
+        plannerContext = event[2]
+        if re.match(r"^\d+$", message.lower()):
+            message = int(message)
+            if message >= plannerContext.readingRate:
+                response = "You read all your chapters for today! Good Job! :)"
+                plannerContext.bot.send_text_message(event[1], response)
+            elif message < plannerContext.readingRate:
+                plannerContext.nextChp = plannerContext.currentChp + message
+                plannerContext.nextBook = plannerContext.currentBook
+                if plannerContext.nextChp > bible[plannerContext.currentBook]['chapters']:
+                    plannerContext.nextBook = bible[plannerContext.currentBook]['next']
+                    plannerContext.nextChp = plannerContext.nextChp % bible[plannerContext.currentBook]['chapters']
+                response = f"You read {message}/{plannerContext.readingRate} chapters today. Keep up the discipline! You can do it!"
+                plannerContext.bot.send_text_message(event[1], response)
+        elif message.lower() == 'back':
+            pass
+        else:
+            response = "Sorry, I couldn't understand your response! Please enter a number!"
+            plannerContext.bot.send_text_message(event[1], response)
+
+        self.transitions = {
+            message: Planner.menu
+        }
+        return State.next(self, message)
 
 class Planner(StateMachine):
     def __init__(self, messengerBot):
         StateMachine.__init__(self, Planner.welcome)
-        self.plannerContext = PlannerContext()
-        self.bot = messengerBot
+        self.plannerContext = PlannerContext(messengerBot)
 
     def process(self, event):
         event = (event[0], event[1], self.plannerContext,)
+        # print(f"Planner {event[0]}- {self.plannerContext}")
+        # print(f"current state - {self.currentState}")
         if self.currentState == Planner.welcome:
-            response = self.currentState.run(event)
-            self.bot.send_text_message(event[1], response)
+            self.currentState.run(event)
         self.currentState = self.currentState.next(event)
-        response = self.currentState.run(event)
-        self.bot.send_text_message(event[1], response)
+        # print(f"next state - {self.currentState}")
+        # print(f"Planner After {event[0]}- {self.plannerContext}")
+        self.currentState.run(event)
 
         # if no transition states for current state, reset state to menu
-        if not self.currentState.next(event):
+        if self.currentState.lastState:
+            # print(f"resetting current state {self.currentState} to menu")
             self.currentState = Planner.menu
-            response = self.currentState.run(event)
-            self.bot.send_text_message(event[1], response)
+            self.currentState.run(event)
 
 
 Planner.welcome = Welcome()
 Planner.menu = Menu()
-Planner.invalid = Invalid()
 Planner.startPlan = startPlan()
 Planner.getReadingRate = getReadingRate()
 Planner.planCreated = planCreated()
 Planner.todayReading = todayReading()
-Planner.yesterdayReading = yesterdayReading()
 Planner.tomorrowReading = tomorrowReading()
-
+Planner.endDate = endDate()
+Planner.missedReading = missedReading()

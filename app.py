@@ -7,9 +7,8 @@ startTime = time.time()
 app = Flask(__name__)
 ACCESS_TOKEN = os.environ['ACCESS_TOKEN']
 VERIFY_TOKEN = os.environ['VERIFY_TOKEN']
-bot = Bot(ACCESS_TOKEN)
-planner = Planner(bot)
-print(f"bot start up {time.time() - startTime}")
+users = {}
+# print(f"bot start up {time.time() - startTime}")
 
 def verify_fb_token(token_sent):
     # take token sent by facebook and verify it matches the verify token you sent
@@ -27,7 +26,7 @@ def receive_message():
         token_sent = request.args.get("hub.verify_token")
         return verify_fb_token(token_sent)
     else:
-        startTime = time.time()
+        # startTime = time.time()
         # get whatever message a user sent the bot
         output = request.get_json()
         for event in output['entry']:
@@ -36,9 +35,14 @@ def receive_message():
                 if message.get('message'):
                     # Facebook Messenger ID for user so we know where to send response back to
                     recipient_id = message['sender']['id']
+                    if recipient_id not in users:
+                        users[recipient_id] = Planner(Bot(ACCESS_TOKEN))
                     messageText = message['message'].get('text')
-                    planner.process((messageText, recipient_id,))
-        print(f"post process {time.time() - startTime}")
+                    try:
+                        users[recipient_id].process((messageText, recipient_id,))
+                    except:
+                        print(f"ERROR: could not find {recipient_id} in users!")
+        # print(f"post process {time.time() - startTime}")
     return "Message Processed"
 
 if __name__ == '__main__':
@@ -46,8 +50,35 @@ if __name__ == '__main__':
 
 
 # TODO: why take so long to process first message? - usually when there is unprocessed message by user
+# why state machine running startPlan.next() after startPlan.run() and waiting for input? - checking if next state is none runs next()
 # why sending multiple POST requests per message? - watermark post request
 # how to pass information between states? context object in stateMachine to be passed around
-# TODO: starting chp > max chapters?
-# TODO: separate initial state from menu state
-# TODO: update current book/chp every night
+# separate initial state from menu state
+# update current book/chp every night
+# camel case book name when responding to user
+# TODO: congratulations message after finishing revelation
+# better error message for no plan created yet / bad values
+# TODO: thread track reminder time
+# TODO: random verse
+# TODO?: option to ready chronologically?
+# TODO?: have tutorials?
+# TODO?: what if user reads more than daily amount?
+# setCurrentReading() and getTomorrow() similar code
+# TODO?: if reading plan exists, and user tries starting new reading plan but errors, then current reading plan is gone? should still retain current reading plan
+# TODO: back option
+""" 
+TODO: Test Cases: 
+    today/tomorrowReading/endDate when plan not set?
+    starting book/chp outside of bible?
+    starting chp/readingRate is '', negative
+    readingRate > bible[book][chapters]? 100? 1000? 2000? 0?
+    reading rate:
+        genesis 1 + 3
+        genesis 48 + 3
+        genesis 50 + 3
+    missed reading:
+        50-2   (read 2) -> 50-1
+        50-2   (read 1) -> 50
+        48-50 (read 0) -> 45-47
+        48-50 (read 3) -> N/A
+    """
