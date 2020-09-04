@@ -32,10 +32,8 @@ def receive_message():
         that confirms all requests that your bot receives came from Facebook."""
         token_sent = request.args.get("hub.verify_token")
         response = verify_fb_token(token_sent)
-        logger.info("verified")
         return response
     else:
-        # startTime = time.time()
         # get whatever message a user sent the bot
         output = request.get_json()
         for event in output['entry']:
@@ -52,11 +50,10 @@ def receive_message():
                         users[recipient_id].process((messageText, recipient_id,))
                     except:
                         logger.exception(f"ERROR: could not find {recipient_id} in users!", exc_info=True)
-        # print(f"post process {time.time() - startTime}")
     return "Message Processed"
 
 if __name__ == '__main__':
-    app.run(debug=False)
+    app.run(debug=False, use_reloader=False)
 
 
 # TODO: why take so long to process first message? - usually when there is unprocessed message by user
