@@ -1,3 +1,6 @@
+import random
+
+
 # 1189 chapters
 bible = {
         'genesis': {'chapters': 50, 'next': 'exodus'},
@@ -67,3 +70,10 @@ bible = {
         'jude': {'chapters': 1, 'next': 'revelation'},
         'revelation': {'chapters': 22, 'next': 'genesis'}
 }
+
+def getRandomVerse():
+        verses = [
+                "Do not be anxious about anything, but in every situation, by prayer and petition, with thanksgiving, present your requests to God.\nAnd the peace of God, which transcends all understanding, will guard your hearts and your minds in Christ Jesus. \n\nPhilippians 4:6-7",
+                'But above all, my brothers, do not swear, either by heaven or by earth or by any other oath, but let your “yes” be yes and your “no” be no, so that you may not fall under condemnation \n\nJames 5:12'
+        ]
+        return random.choice(verses)

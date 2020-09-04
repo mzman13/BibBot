@@ -2,7 +2,7 @@ import re
 from datetime import datetime
 from State import State
 from StateMachine import StateMachine
-from Bible import bible
+from Bible import bible, getRandomVerse
 from PlannerContext import PlannerContext
 
 
@@ -31,7 +31,7 @@ class Menu(State):
                    "3) Get Tomorrow's Reading\n" \
                    "4) Missed Today's Reading?\n" \
                    "5) Get End Date\n" \
-                   f"{eight} (TBD) Tell me a random bible verse!\n"
+                   f"{eight} Tell me a random bible verse!\n"
                     # "6) (TBD) Set/Update a Reminder\n" \
                     # "7) (TBD) Delete Reminder\n" \
         plannerContext.bot.send_text_message(event[1], response)
@@ -43,7 +43,8 @@ class Menu(State):
             '2': Planner.todayReading,
             '3': Planner.tomorrowReading,
             '4': Planner.missedReading,
-            '5': Planner.endDate
+            '5': Planner.endDate,
+            '8': Planner.getVerse
         }
         message = event[0]
         if message not in self.transitions:
@@ -229,6 +230,19 @@ class missedReading(State):
         }
         return State.next(self, message)
 
+class getVerse(State):
+    def __init__(self):
+        self.lastState = True
+
+    def run(self, event):
+        plannerContext = event[2]
+        response = getRandomVerse()
+        plannerContext.bot.send_text_message(event[1], response)
+        return response
+
+    def next(self, event):
+        return None
+
 class Planner(StateMachine):
     def __init__(self, messengerBot):
         StateMachine.__init__(self, Planner.welcome)
@@ -261,3 +275,4 @@ Planner.todayReading = todayReading()
 Planner.tomorrowReading = tomorrowReading()
 Planner.endDate = endDate()
 Planner.missedReading = missedReading()
+Planner.getVerse = getVerse()

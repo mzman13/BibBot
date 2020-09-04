@@ -5,10 +5,8 @@ from Planner import Planner
 
 startTime = time.time()
 app = Flask(__name__)
-# ACCESS_TOKEN = os.environ['ACCESS_TOKEN']
-# VERIFY_TOKEN = os.environ['VERIFY_TOKEN']
-ACCESS_TOKEN = "EAAw80bZAYciMBAAZBcoXpnIxZANsm66HCatKZBJj1Hu8iFrd6a39BDSUe6PNvbcfx3qp7ideRbklDZA2Ej6KMwM5GlLFnqttArTrULVwJmdofr3B6JPRTVNp6SNoLVwBfLZC2HgE3QZBEzrsGtwyn9xxvYtJ6Ja7VHTHcJ8IJOisgZDZD"
-VERIFY_TOKEN = "PXuyXrrJXoX5m2jHqyVj4cQvpzUqXYqWTlO7BRSC7HVZVgo9la7Y7WA3L3xZZXZbkd4akW"
+ACCESS_TOKEN = os.environ['ACCESS_TOKEN']
+VERIFY_TOKEN = os.environ['VERIFY_TOKEN']
 users = {}
 # print(f"bot start up {time.time() - startTime}")
 
@@ -61,7 +59,6 @@ if __name__ == '__main__':
 # TODO: congratulations message after finishing revelation
 # better error message for no plan created yet / bad values
 # TODO: thread track reminder time
-# TODO: random verse
 # TODO?: option to ready chronologically?
 # TODO?: have tutorials?
 # TODO?: what if user reads more than daily amount?
