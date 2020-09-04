@@ -260,14 +260,14 @@ class Planner(StateMachine):
             self.currentState.run(event)
         self.currentState = self.currentState.next(event)
         self.plannerContext.logger.info(f"next state - {self.currentState}")
-        self.plannerContext.logger.info(f"Planner After {event[0]}, {self.currentState.lastState}- {self.plannerContext}")
         self.currentState.run(event)
 
         # if no transition states for current state, reset state to menu
         if self.currentState.lastState:
-            self.plannerContext.logger.info(f"resetting current state to menu")
+            self.plannerContext.logger.info(f"resetting current state to {self.currentState}")
             self.currentState = Planner.menu
             self.currentState.run(event)
+        self.plannerContext.logger.info(f"Planner After {event[0]}, {self.currentState.lastState}- {self.plannerContext}")
 
 
 Planner.welcome = Welcome()

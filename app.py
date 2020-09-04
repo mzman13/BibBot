@@ -15,7 +15,6 @@ stdoutHandler = logging.StreamHandler()
 stdoutHandler.setFormatter(formatter)
 logger.addHandler(stdoutHandler)
 logger.setLevel(logging.INFO)
-
 logger.info(f"bot start up {time.time() - startTime}")
 
 def verify_fb_token(token_sent):
@@ -32,7 +31,9 @@ def receive_message():
         """Before allowing people to message your bot, Facebook has implemented a verify token
         that confirms all requests that your bot receives came from Facebook."""
         token_sent = request.args.get("hub.verify_token")
-        return verify_fb_token(token_sent)
+        response = verify_fb_token(token_sent)
+        logger.info("verified")
+        return response
     else:
         # startTime = time.time()
         # get whatever message a user sent the bot
@@ -55,7 +56,7 @@ def receive_message():
     return "Message Processed"
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=False)
 
 
 # TODO: why take so long to process first message? - usually when there is unprocessed message by user
