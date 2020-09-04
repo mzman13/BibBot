@@ -4,7 +4,7 @@ from Bible import bible
 
 
 class PlannerContext:
-    def __init__(self, messengerBot):
+    def __init__(self, messengerBot, logger):
         self.readingRate = None
         self.currentBook = None
         self.currentChp = None
@@ -12,6 +12,7 @@ class PlannerContext:
         self.nextChp = None
         self.today = None
         self.bot = messengerBot
+        self.logger = logger
 
     def __str__(self):
         return f"{self.readingRate} {self.currentBook} {self.currentChp} {self.nextBook} {self.nextChp} {self.today}"

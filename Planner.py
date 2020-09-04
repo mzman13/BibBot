@@ -56,6 +56,7 @@ class Menu(State):
 class startPlan(State):
     def run(self, event):
         plannerContext = event[2]
+        plannerContext.logger.info("startPlan run()")
         response = "What Book and Chapter are you starting on?\n(Format should be BookName Chp#)\n" \
                    "To go back, type back"
         plannerContext.bot.send_text_message(event[1], response)
@@ -64,6 +65,7 @@ class startPlan(State):
     def next(self, event):
         message = event[0].lower()
         plannerContext = event[2]
+        plannerContext.logger.info("startPlan next()")
         returnCode = 0
         if re.match(r"^\w+ \d+$", message):
             messageValues = message.split(' ')
@@ -95,6 +97,7 @@ class startPlan(State):
 class getReadingRate(State):
     def run(self, event):
         plannerContext = event[2]
+        plannerContext.logger.info("getReadingRate run()")
         response = "How many chapters will you read a day?"
         plannerContext.bot.send_text_message(event[1], response)
         return response
@@ -102,6 +105,7 @@ class getReadingRate(State):
     def next(self, event):
         message = event[0]
         plannerContext = event[2]
+        plannerContext.logger.info("getReadingRate next()")
         returnCode = 0
         if re.match(r"^\d+$", message.lower()):
             message = int(message)
@@ -244,24 +248,24 @@ class getVerse(State):
         return None
 
 class Planner(StateMachine):
-    def __init__(self, messengerBot):
+    def __init__(self, messengerBot, logger):
         StateMachine.__init__(self, Planner.welcome)
-        self.plannerContext = PlannerContext(messengerBot)
+        self.plannerContext = PlannerContext(messengerBot, logger)
 
     def process(self, event):
         event = (event[0], event[1], self.plannerContext,)
-        # print(f"Planner {event[0]}- {self.plannerContext}")
-        # print(f"current state - {self.currentState}")
+        self.plannerContext.logger.info(f"Planner {event[0]}- {self.plannerContext}")
+        self.plannerContext.logger.info(f"current state - {self.currentState}")
         if self.currentState == Planner.welcome:
             self.currentState.run(event)
         self.currentState = self.currentState.next(event)
-        # print(f"next state - {self.currentState}")
-        # print(f"Planner After {event[0]}, {self.currentState.lastState}- {self.plannerContext}")
+        self.plannerContext.logger.info(f"next state - {self.currentState}")
+        self.plannerContext.logger.info(f"Planner After {event[0]}, {self.currentState.lastState}- {self.plannerContext}")
         self.currentState.run(event)
 
         # if no transition states for current state, reset state to menu
         if self.currentState.lastState:
-            # print(f"resetting current state {self.currentState} to menu")
+            self.plannerContext.logger.info(f"resetting current state to menu")
             self.currentState = Planner.menu
             self.currentState.run(event)
 

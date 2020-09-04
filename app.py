@@ -8,19 +8,15 @@ app = Flask(__name__)
 ACCESS_TOKEN = os.environ['ACCESS_TOKEN']
 VERIFY_TOKEN = os.environ['VERIFY_TOKEN']
 users = {}
-print(f"bot start up {time.time() - startTime}")
-sys.stdout.flush()
 
-testLogger = logging.getLogger('testlogger')
-formatter = logging.Formatter('%(levelname)s: %(message)s')
+logger = logging.getLogger('testlogger')
+formatter = logging.Formatter('%(filename)s - line: %(lineno)d - %(message)s')
 stdoutHandler = logging.StreamHandler()
 stdoutHandler.setFormatter(formatter)
-testLogger.addHandler(stdoutHandler)
-testLogger.setLevel(logging.INFO)
-testLogger.info("this is test #2")
+logger.addHandler(stdoutHandler)
+logger.setLevel(logging.INFO)
 
-logger = logging.getLogger('gunicorn.error')
-logger.info("This is test")
+logger.info(f"bot start up {time.time() - startTime}")
 
 def verify_fb_token(token_sent):
     # take token sent by facebook and verify it matches the verify token you sent
@@ -48,12 +44,13 @@ def receive_message():
                     # Facebook Messenger ID for user so we know where to send response back to
                     recipient_id = message['sender']['id']
                     if recipient_id not in users:
-                        users[recipient_id] = Planner(Bot(ACCESS_TOKEN))
+                        users[recipient_id] = Planner(Bot(ACCESS_TOKEN), logger)
+                    logger.info(users)
                     messageText = message['message'].get('text')
                     try:
                         users[recipient_id].process((messageText, recipient_id,))
                     except:
-                        print(f"ERROR: could not find {recipient_id} in users!")
+                        logger.exception(f"ERROR: could not find {recipient_id} in users!", exc_info=True)
         # print(f"post process {time.time() - startTime}")
     return "Message Processed"
 
