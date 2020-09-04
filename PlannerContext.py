@@ -42,13 +42,13 @@ class PlannerContext:
 
     def _calculateNext(self, currentBook, currentChp):
         if currentChp + self.readingRate > bible[currentBook]['chapters']:
-            total = self.readingRate - bible[currentBook]['chapters']
+            total = (currentChp + self.readingRate) - bible[currentBook]['chapters']
             current = currentBook
             while True:
                 next = bible[current]['next']
                 if bible[next]['chapters'] > total:
                     nextBook = next
-                    nextChp = total + 1
+                    nextChp = total
                     break
                 else:
                     current = next

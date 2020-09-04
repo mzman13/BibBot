@@ -77,7 +77,7 @@ class startPlan(State):
                 response = "Sorry, I couldn't find the name of the book you wanted. Did you misspell it?"
                 plannerContext.bot.send_text_message(event[1], response)
             elif int(messageValues[1]) > bible[messageValues[0]]['chapters']:
-                response = f"Sorry, your starting chapter is more than the number of chapters in {messageValues[0]}. Please enter a starting chapter less than {bible[messageValues[0]]['chapters']}"
+                response = f"Sorry, your starting chapter is more than the number of chapters in {messageValues[0].title()}. Please enter a starting chapter less than {bible[messageValues[0]]['chapters']}"
                 plannerContext.bot.send_text_message(event[1], response)
         elif message == 'back':
             pass
@@ -101,29 +101,28 @@ class getReadingRate(State):
     def next(self, event):
         message = event[0]
         plannerContext = event[2]
+        returnCode = 0
         if re.match(r"^\d+$", message.lower()):
             message = int(message)
             if message > 1189 or message < 1:
                 response = "Sorry, Please enter a number between 1 to 1189!"
                 plannerContext.bot.send_text_message(event[1], response)
                 plannerContext.reset()
-                message = 0
             else:
                 plannerContext.readingRate = message  # inclusive start, ex: [50, 52]
                 plannerContext.setCurrentReading()
                 plannerContext.today = datetime.date(datetime.now())
-                message = 1
+                returnCode = 1
         else:
-            response = "Sorry, I couldn't understand your response! Please enter a number without commas!"
+            response = "Sorry, I couldn't understand your response! Please enter a number!"
             plannerContext.bot.send_text_message(event[1], response)
             plannerContext.reset()
-            message = 0
 
         self.transitions = {
             0: Planner.menu,
             1: Planner.planCreated
         }
-        return State.next(self, message)
+        return State.next(self, returnCode)
 
 class planCreated(State):
     def __init__(self):
@@ -243,7 +242,7 @@ class Planner(StateMachine):
             self.currentState.run(event)
         self.currentState = self.currentState.next(event)
         # print(f"next state - {self.currentState}")
-        # print(f"Planner After {event[0]}- {self.plannerContext}")
+        # print(f"Planner After {event[0]}, {self.currentState.lastState}- {self.plannerContext}")
         self.currentState.run(event)
 
         # if no transition states for current state, reset state to menu
