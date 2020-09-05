@@ -65,12 +65,14 @@ if __name__ == '__main__':
 # TODO: congratulations message after finishing revelation
 # better error message for no plan created yet / bad values
 # TODO: thread track reminder time
-# TODO?: option to ready chronologically?
+# TODO?: option to read chronologically?
 # TODO?: have tutorials?
 # TODO?: what if user reads more than daily amount?
 # setCurrentReading() and getTomorrow() similar code
 # TODO?: if reading plan exists, and user tries starting new reading plan but errors, then current reading plan is gone? should still retain current reading plan
 # TODO: back option
+# TODO: option visit facebook page
+# TODO: sqllite store data in case app shuts down
 """ 
 TODO: Test Cases: 
     today/tomorrowReading/endDate when plan not set?
