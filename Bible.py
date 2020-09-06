@@ -68,7 +68,8 @@ bible = {
         '2 john': {'chapters': 1, 'next': '3 john'},
         '3 john': {'chapters': 1, 'next': 'jude'},
         'jude': {'chapters': 1, 'next': 'revelation'},
-        'revelation': {'chapters': 22, 'next': 'revelation'}
+        'revelation': {'chapters': 22, 'next': 'done'},
+        'done': {'chapters': 0, 'next': 'done'}
 }
 
 def getRandomVerse():

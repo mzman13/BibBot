@@ -17,6 +17,9 @@ class PlannerContext:
     def __str__(self):
         return f"{self.readingRate} {self.currentBook} {self.currentChp} {self.nextBook} {self.nextChp} {self.today}"
 
+    def sendMessage(self, userId, message):
+        self.bot.send_text_message(userId, message)
+
     def updateToday(self):
         if self.today and datetime.date(datetime.now()) > self.today:
             self.today = datetime.date(datetime.now())
@@ -29,16 +32,26 @@ class PlannerContext:
         self.nextBook, self.nextChp = self._calculateNext(self.currentBook, self.currentChp)
 
     def getTodayReading(self):
-        nextBook = self.nextBook if (self.nextChp > 1) else self.currentBook
-        nextChp = (self.nextChp - 1) if (self.nextChp > 1) else bible[self.currentBook]['chapters']
+        if self.nextBook == 'done':
+            nextBook = 'revelation'
+            nextChp = '22'
+        else:
+            nextBook = self.nextBook if (self.nextChp > 1) else self.currentBook
+            nextChp = (self.nextChp - 1) if (self.nextChp > 1) else bible[self.currentBook]['chapters']
         return f"Today's reading is from {self.currentBook.title()} {self.currentChp} to {nextBook.title()} {nextChp}"
 
     def getTomorrowReading(self):
-        currentBook = self.nextBook
-        currentChp = self.nextChp
-        nextBook, nextChp = self._calculateNext(currentBook, currentChp)
-        nextBook = nextBook if (nextChp > 1) else currentBook
-        nextChp = (nextChp - 1) if (nextChp > 1) else bible[currentBook]['chapters']
+        if self.nextBook == 'done':
+            currentBook = self.currentBook
+            currentChp = self.currentChp
+            nextBook = 'revelation'
+            nextChp = '22'
+        else:
+            currentBook = self.nextBook
+            currentChp = self.nextChp
+            nextBook, nextChp = self._calculateNext(currentBook, currentChp)
+            nextBook = nextBook if (nextChp > 1) else currentBook
+            nextChp = (nextChp - 1) if (nextChp > 1) else bible[currentBook]['chapters']
         return f"Tomorrow's reading is from {currentBook.title()} {currentChp} to {nextBook.title()} {nextChp}"
 
     def _calculateNext(self, currentBook, currentChp):
@@ -47,7 +60,7 @@ class PlannerContext:
             current = currentBook
             while True:
                 next = bible[current]['next']
-                if bible[next]['chapters'] > total:
+                if next == 'done' or bible[next]['chapters'] > total:
                     nextBook = next
                     nextChp = total
                     break
@@ -60,11 +73,15 @@ class PlannerContext:
         return nextBook, nextChp
 
     def getEndDateRemainingChps(self):
+        # add remaining chapters in current book and remaining books until revelation
+
         remainingChps = 0
         for book, info in bible.items():
-            if book == self.nextBook:
+            if self.nextBook == 'done':
+                pass
+            elif self.nextBook == book:
                 remainingChps += (info['chapters'] - self.nextChp) + 1
-            elif remainingChps > 0:
+            else:
                 remainingChps += info['chapters']
         remainingDays = math.ceil(remainingChps / self.readingRate)
         return remainingChps, remainingDays

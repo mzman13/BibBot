@@ -48,7 +48,7 @@ def receive_message():
                     try:
                         users[recipient_id].process((messageText, recipient_id,))
                     except:
-                        logger.exception(f"ERROR: could not find {recipient_id} in users!", exc_info=True)
+                        logger.exception(f"ERROR: could not process message {messageText} for user {recipient_id}", exc_info=True)
     return "Message Processed"
 
 if __name__ == '__main__':
@@ -92,5 +92,7 @@ TODO: Test Cases:
         48-50 (read 0) -> 45-47
         48-50 (read 3) -> N/A
     back
-    revelation 22
+    end date:
+        current chp - revelation 20, rate - 3, next chap - revelation/genesis 1
+        current chp - hebrews 1, rate - 56, next chap - revelation/genesis 1
     """
