@@ -1,5 +1,5 @@
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 from State import State
 from StateMachine import StateMachine
 from Bible import bible, getRandomVerse
@@ -95,7 +95,7 @@ class startPlan(State):
 class getReadingRate(State):
     def run(self, event):
         plannerContext = event[2]
-        response = "How many chapters will you read a day?"
+        response = "How many chapters will you read a day?\nTo go back, type back"
         plannerContext.bot.send_text_message(event[1], response)
         return response
 
@@ -114,6 +114,10 @@ class getReadingRate(State):
                 plannerContext.setCurrentReading()
                 plannerContext.today = datetime.date(datetime.now())
                 returnCode = 1
+        elif message.lower() == 'back':
+            returnCode = 'back'
+            plannerContext.currentBook = None
+            plannerContext.currentChp = None
         else:
             response = "Sorry, I couldn't understand your response! Please enter a number!"
             plannerContext.bot.send_text_message(event[1], response)
@@ -121,7 +125,8 @@ class getReadingRate(State):
 
         self.transitions = {
             0: Planner.menu,
-            1: Planner.planCreated
+            1: Planner.planCreated,
+            'back': Planner.startPlan
         }
         return State.next(self, returnCode)
 
@@ -148,6 +153,9 @@ class todayReading(State):
         plannerContext.updateToday()
         if plannerContext.nextChp:
             response = plannerContext.getTodayReading()
+            remainingChps, remainingDays = plannerContext.getEndDateRemainingChps()
+            if remainingDays == 1:
+                plannerContext.bot.send_text_message(event[1], "Congratulations!!! Today is the last day of your reading plan! :D\nGreat job on making it this far :)")
         else:
             response = "No reading plan found!\nPlease start a new reading plan!"
         plannerContext.bot.send_text_message(event[1], response)
@@ -181,7 +189,8 @@ class endDate(State):
         plannerContext = event[2]
         plannerContext.updateToday()
         if plannerContext.nextChp:
-            response = plannerContext.getEndDateRemainingChps()
+            remainingChps, remainingDays = plannerContext.getEndDateRemainingChps()
+            response = f"{remainingChps} chapters left!\nYou will finish reading the bible in {remainingDays} days on {plannerContext.today + timedelta(days=remainingDays)}"
         else:
             response = "No reading plan found!\nPlease start a new reading plan!"
         plannerContext.bot.send_text_message(event[1], response)

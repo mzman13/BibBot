@@ -62,17 +62,20 @@ if __name__ == '__main__':
 # separate initial state from menu state
 # update current book/chp every night
 # camel case book name when responding to user
-# TODO: congratulations message after finishing revelation
+# congratulations message after finishing revelation
 # better error message for no plan created yet / bad values
+# back - getReadingRate()
 # TODO: thread track reminder time
+# TODO: when waking up from idle, don't run welcome state
+# TODO: heroku postgres store data in case app shuts down
+
+# TODO?: store userId in plannerContext?
 # TODO?: option to read chronologically?
 # TODO?: have tutorials?
 # TODO?: what if user reads more than daily amount?
 # setCurrentReading() and getTomorrow() similar code
 # TODO?: if reading plan exists, and user tries starting new reading plan but errors, then current reading plan is gone? should still retain current reading plan
-# TODO: back option
-# TODO: option visit facebook page
-# TODO: sqllite store data in case app shuts down
+# TODO?: option visit facebook page
 """ 
 TODO: Test Cases: 
     today/tomorrowReading/endDate when plan not set?
@@ -88,4 +91,6 @@ TODO: Test Cases:
         50-2   (read 1) -> 50
         48-50 (read 0) -> 45-47
         48-50 (read 3) -> N/A
+    back
+    revelation 22
     """

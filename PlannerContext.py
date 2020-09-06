@@ -67,7 +67,7 @@ class PlannerContext:
             elif remainingChps > 0:
                 remainingChps += info['chapters']
         remainingDays = math.ceil(remainingChps / self.readingRate)
-        return f"{remainingChps} chapters left!\nYou will finish reading the bible in {remainingDays} days on {self.today + timedelta(days=remainingDays)}"
+        return remainingChps, remainingDays
 
     def reset(self):
         self.readingRate = None
