@@ -72,7 +72,6 @@ if __name__ == '__main__':
 # TODO: when waking up from idle, don't run welcome state
 # TODO: heroku postgres store data in case app shuts down
 # TODO: store userId in plannerContext?
-# TODO: user enters psalm/psalms?
 
 # TODO?: why take so long to process first message? - usually when there is unprocessed message by user
 # TODO?: option to read chronologically?

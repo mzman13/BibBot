@@ -73,6 +73,7 @@ class startPlan(State):
         elif re.match(r"^\w+ \d+$", message):
             book = messageValues[0]
             chp = int(messageValues[1])
+            book = 'psalms' if book == 'psalm' else book
             returnCode = self.processResponse(plannerContext, book, chp, event[1])
         elif re.match(r"^\d \w+ \d+$", message):
             book = f"{messageValues[0]} {messageValues[1]}"
