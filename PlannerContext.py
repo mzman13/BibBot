@@ -44,14 +44,17 @@ class PlannerContext:
         if self.nextBook == 'done':
             currentBook = self.currentBook
             currentChp = self.currentChp
-            nextBook = 'revelation'
-            nextChp = '22'
+            nextBook = self.nextBook
         else:
             currentBook = self.nextBook
             currentChp = self.nextChp
             nextBook, nextChp = self._calculateNext(currentBook, currentChp)
             nextBook = nextBook if (nextChp > 1) else currentBook
             nextChp = (nextChp - 1) if (nextChp > 1) else bible[currentBook]['chapters']
+
+        if nextBook == 'done':
+            nextBook = 'revelation'
+            nextChp = '22'
         return f"Tomorrow's reading is from {currentBook.title()} {currentChp} to {nextBook.title()} {nextChp}"
 
     def _calculateNext(self, currentBook, currentChp):
@@ -76,12 +79,14 @@ class PlannerContext:
         # add remaining chapters in current book and remaining books until revelation
 
         remainingChps = 0
+        foundNext = False
         for book, info in bible.items():
             if self.nextBook == 'done':
-                pass
+                break
             elif self.nextBook == book:
                 remainingChps += (info['chapters'] - self.nextChp) + 1
-            else:
+                foundNext = True
+            elif foundNext:
                 remainingChps += info['chapters']
         remainingDays = math.ceil(remainingChps / self.readingRate)
         return remainingChps, remainingDays
@@ -93,3 +98,9 @@ class PlannerContext:
         self.nextBook = None
         self.nextChp = None
         self.today = None
+
+    def createReminder(self):
+        pass
+
+    def deleteReminder(self):
+        pass

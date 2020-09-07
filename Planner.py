@@ -31,9 +31,9 @@ class Menu(State):
                    "3) Get Tomorrow's Reading\n" \
                    "4) Missed Today's Reading?\n" \
                    "5) Get End Date\n" \
+                   "6) Set/Update a Reminder\n" \
+                   "7) Delete Reminder\n" \
                    f"{eight} Tell me a random bible verse!\n"
-                    # "6) (TBD) Set/Update a Reminder\n" \
-                    # "7) (TBD) Delete Reminder\n" \
         plannerContext.sendMessage(event[1], response)
         return response
 
@@ -44,6 +44,8 @@ class Menu(State):
             '3': Planner.tomorrowReading,
             '4': Planner.missedReading,
             '5': Planner.endDate,
+            '6': Planner.setReminder,
+            '7': Planner.deleteReminder,
             '8': Planner.getVerse
         }
         message = event[0]
@@ -64,38 +66,57 @@ class startPlan(State):
     def next(self, event):
         message = event[0].lower()
         plannerContext = event[2]
-        returnCode = 0
-        if re.match(r"^\w+ \d+$", message):
-            messageValues = message.split(' ')
-            # check if book name in bible or if starting chp is <= book's # of chapters
-            if messageValues[0] in bible and int(messageValues[1]) <= bible[messageValues[0]]['chapters']:
-                plannerContext.currentBook = messageValues[0]
-                plannerContext.currentChp = int(messageValues[1])
-                plannerContext.nextBook = None
-                plannerContext.nextChp = None
-                returnCode = 1
-            elif messageValues[0] not in bible:
-                response = "Sorry, I couldn't find the name of the book you wanted. Did you misspell it?"
-                plannerContext.sendMessage(event[1], response)
-            elif int(messageValues[1]) > bible[messageValues[0]]['chapters']:
-                response = f"Sorry, your starting chapter is more than the number of chapters in {messageValues[0].title()}. Please enter a starting chapter less than {bible[messageValues[0]]['chapters']}"
-                plannerContext.sendMessage(event[1], response)
-        elif message == 'back':
+        returnCode = 'back'
+        messageValues = message.split(' ')
+        if message == 'back':
             pass
+        elif re.match(r"^\w+ \d+$", message):
+            book = messageValues[0]
+            chp = int(messageValues[1])
+            returnCode = self.processResponse(plannerContext, book, chp, event[1])
+        elif re.match(r"^\d \w+ \d+$", message):
+            book = f"{messageValues[0]} {messageValues[1]}"
+            chp = int(messageValues[2])
+            returnCode = self.processResponse(plannerContext, book, chp, event[1])
+        elif re.match(r"^[a-zA-Z]+ [a-zA-Z]+ [a-zA-Z]+ \d+$", message):
+            book = f"{messageValues[0]} {messageValues[1]} {messageValues[2]}"
+            chp = int(messageValues[3])
+            book = 'song of solomon' if book == 'song of songs' else book
+            returnCode = self.processResponse(plannerContext, book, chp, event[1])
         else:
-            response = "Sorry, I couldn't understand your response, Please make sure your response follows the format of BookName Chapter#"
+            response = "Sorry, I couldn't find the book/chapter you wanted, Please make sure your response follows the format of BookName Chapter#"
             plannerContext.sendMessage(event[1], response)
+            returnCode = 0
 
         self.transitions = {
-            0: Planner.menu,
-            1: Planner.getReadingRate
+            0: Planner.startPlan,
+            1: Planner.getReadingRate,
+            'back': Planner.menu
         }
         return State.next(self, returnCode)
+
+    def processResponse(self, plannerContext, book, chp, userId):
+        if book not in bible:
+            response = "Sorry, I couldn't find the name of the book you wanted. Did you misspell it?"
+            plannerContext.sendMessage(userId, response)
+            return 0
+        elif chp > bible[book]['chapters']:
+            response = f"Sorry, your starting chapter is more than the number of chapters in {book.title()}. Please enter a starting chapter less than {bible[book]['chapters']}"
+            plannerContext.sendMessage(userId, response)
+            return 0
+        # check if book name in bible or if starting chp is <= book's # of chapters
+        elif book in bible and chp <= bible[book]['chapters']:
+            plannerContext.currentBook = book
+            plannerContext.currentChp = chp
+            plannerContext.nextBook = None
+            plannerContext.nextChp = None
+            return 1
 
 class getReadingRate(State):
     def run(self, event):
         plannerContext = event[2]
-        response = "How many chapters will you read a day?\nTo go back, type back"
+        response = "How many chapters will you read a day?\n" \
+                   "To go back, type back"
         plannerContext.sendMessage(event[1], response)
         return response
 
@@ -108,7 +129,6 @@ class getReadingRate(State):
             if message > 1189 or message < 1:
                 response = "Sorry, Please enter a number between 1 to 1189!"
                 plannerContext.sendMessage(event[1], response)
-                plannerContext.reset()
             else:
                 plannerContext.readingRate = message  # inclusive start, ex: [50, 52]
                 plannerContext.setCurrentReading()
@@ -119,12 +139,11 @@ class getReadingRate(State):
             plannerContext.currentBook = None
             plannerContext.currentChp = None
         else:
-            response = "Sorry, I couldn't understand your response! Please enter a number!"
+            response = "Sorry, I couldn't understand your response! Please enter a positive number!"
             plannerContext.sendMessage(event[1], response)
-            plannerContext.reset()
 
         self.transitions = {
-            0: Planner.menu,
+            0: Planner.getReadingRate,
             1: Planner.planCreated,
             'back': Planner.startPlan
         }
@@ -255,6 +274,54 @@ class getVerse(State):
     def next(self, event):
         return None
 
+class setReminder(State):
+    def run(self, event):
+        plannerContext = event[2]
+        response = "What time would you like to be reminded to read every day?\n" \
+                   "(Please specify am/pm next to the time!)\n " \
+                   "To go back, type back"
+        plannerContext.sendMessage(event[1], response)
+
+    def next(self, event):
+        message = event[0]
+        plannerContext = event[2]
+
+        if re.match(r"^\d+$", message.lower()):
+            # plannerContext.createReminder(message)
+            response = "Okay, I will remind you to read at this time every day!"
+            plannerContext.sendMessage(event[1], response)
+        else:
+            response = "Sorry, I couldn't understand your response! Please enter a number!"
+            plannerContext.sendMessage(event[1], response)
+
+        self.transitions = {
+            message: Planner.menu
+        }
+        return State.next(self, message)
+
+class deleteReminder(State):
+    def run(self, event):
+        plannerContext = event[2]
+        response = "Are you sure you want to delete your reminder?\n" \
+                   "To go back, type back"
+        plannerContext.sendMessage(event[1], response)
+
+    def next(self, event):
+        message = event[0].lower()
+        plannerContext = event[2]
+
+        if message[0] == 'y':
+            # plannerContext.deleteReminder()
+            response = "Okay, I deleted your reminder!"
+        else:
+            response = "Okay, I won't delete your reminder"
+        plannerContext.sendMessage(event[1], response)
+
+        self.transitions = {
+            message: Planner.menu
+        }
+        return State.next(self, message)
+
 class Planner(StateMachine):
     def __init__(self, messengerBot, logger):
         StateMachine.__init__(self, Planner.welcome)
@@ -288,3 +355,5 @@ Planner.tomorrowReading = tomorrowReading()
 Planner.endDate = endDate()
 Planner.missedReading = missedReading()
 Planner.getVerse = getVerse()
+Planner.setReminder = setReminder()
+Planner.deleteReminder = deleteReminder()
