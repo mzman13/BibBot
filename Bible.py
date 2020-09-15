@@ -74,7 +74,39 @@ bible = {
 
 def getRandomVerse():
         verses = [
-                "Do not be anxious about anything, but in every situation, by prayer and petition, with thanksgiving, present your requests to God.\nAnd the peace of God, which transcends all understanding, will guard your hearts and your minds in Christ Jesus. \n\nPhilippians 4:6-7",
-                'But above all, my brothers, do not swear, either by heaven or by earth or by any other oath, but let your “yes” be yes and your “no” be no, so that you may not fall under condemnation \n\nJames 5:12'
+        "Do not be anxious about anything, but in every situation, by prayer and petition, with thanksgiving, present your requests to God.\nAnd the peace of God, which transcends all understanding, will guard your hearts and your minds in Christ Jesus. \n\nPhilippians 4:6-7",
+        'But above all, my brothers, do not swear, either by heaven or by earth or by any other oath, but let your “yes” be yes and your “no” be no, so that you may not fall under condemnation \n\nJames 5:12',
+        "Let those who suffer according to God’s will entrust their souls to a faithful creator while doing good. \n\n1 Peter 4:19",
+        "The Lord your God is in your midst, a mighty one who will save. He will rejoice over you with gladness. He will quiet you by his love. He will exult over you with loud singing. \n\nZephaniah 3:17",
+        "Not that I have already obtained this or am already perfect, but I press on to make it my own, because Christ Jesus has made me his own. \n\nPhilippians 3:12",
+        "And God will wipe away every tear from their eyes; there shall be no more death, nor sorrow, nor crying. There shall be no more pain, for the former things have passed away. \n\nRevelations 21:4",
+        "Blessed is the man who remains steadfast under trial, for when he has stood the test he will receive the crown of life, which God has promised to those who love him. \n\nJames 1:12",
+        "Every good gift and every perfect gift is from above, coming down from the Father of lights with whom there is no variation or shadow due to change. \n\nJames 1:17",
+        "The LORD is my light and my salvation; whom shall I fear? The LORD is the strength of my life; of whom shall I be afraid. \n\nPsalms 27:1",
+        "But the salvation of the righteous is from the LORD; He is their strength in time of trouble. \n\nPsalms 37:39",
+        "In the day when I cried out, You answered me, and made me bold with strength in my soul. \n\nPsalms 138:3",
+        "But Jesus looked at them and said to them, ‘With men this is impossible, but with God all things are possible. \n\nMatthew 19:26",
+        "Therefore we do not lose heart. Even though our outward man is perishing, yet the inward man is being renewed day by day. \n\n2 Corinthians 4:16",
+        "I can do all things through Christ who strengthens me. \n\nPhilippians 4:13",
+        "Have I not commanded you? Be strong and courageous. Do not be terrified; do not be discouraged, for the LORD your God will be with you wherever you go. \n\nJoshua 1:9",
+        "Be strong and of good courage, do not fear nor be afraid of them; for the Lord your God, He is the One who goes with you. He will not leave you nor forsake you. \n\nDeuteronomy 31:6",
+        "Even though I walk through the darkest valley, I will fear no evil, for you are with me; your rod and your staff, they comfort me. \n\nPsalms 23:4",
+        "Come to me, all you who are weary and burdened, and I will give you rest. \n\nMatthew 11:28",
+        "Therefore, my beloved brothers and sisters, be steadfast, immovable, always abounding in the work of the Lord, knowing that in the Lord your labor is not in vain. \n\n1 Corinthians 15:58",
+        "Let us hold fast the confession of our hope without wavering, for he who promised is faithful. \n\nHebrews 10:23",
+        "May the God of endurance and encouragement grant you to live in such harmony with one another, in accord with Christ Jesus, that together you may with one voice glorify the God and Father of our Lord Jesus Christ. \n\nRomans 15:5",
+        "No, in all these things we are more than conquerors through him who loved us. \n\nRomans 8:37",
+        "He gives power to the faint, and to him who has no might he increases strength. Even youths shall faint and be weary, and young men shall fall exhausted; but they who wait for the LORD shall renew their strength; they shall mount up with wings like eagles; they shall run and not be weary; they shall walk and not faint. \n\nIsaiah 40:29-31",
+        "Trust in the Lord with all your heart, and do not lean on your own understanding. In all your ways acknowledge him, and he will make straight your paths. \n\nProverbs 3:5-6",
+        "Let all that you do be done in love. \n\n1 Corinthians 16:14",
+        "for God gave us a spirit not of fear but of power and love and self-control. \n\n2 Timothy 1:7",
+        "For you formed my inward parts; you knitted me together in my mother's womb. I praise you, for I am fearfully and wonderfully made. Wonderful are your works; my soul knows it very well. \n\nPsalm 139:13-14",
+        "Have nothing to do with irreverent, silly myths. Rather train yourself for godliness; for while bodily training is of some value, godliness is of value in every way, as it holds promise for the present life and also for the life to come. The saying is trustworthy and deserving of full acceptance. \n\n1 Timothy 4:7-9",
+        "Why are you cast down, O my soul, and why are you in turmoil within me? Hope in God; for I shall again praise him, my salvation and my God. \n\nPsalm 42:11",
+        "He went up from there to Bethel, and while he was going up on the way, some small boys came out of the city and jeered at him, saying, “Go up, you baldhead! Go up, you baldhead!” And he turned around, and when he saw them, he cursed them in the name of the Lord. And two she-bears came out of the woods and tore forty-two of the boys. \n\n2 Kings 2:23-24",
+        "Jesus said to him, “I am the way, and the truth, and the life. No one comes to the Father except through me. \n\nJohn 14:6",
+        "So now faith, hope, and love abide, these three; but the greatest of these is love. \n\n1 Corinthians 13:13",
+        "Love is patient and kind; love does not envy or boast; it is not arrogant or rude. It does not insist on its own way; it is not irritable or resentful; it does not rejoice at wrongdoing, but rejoices with the truth. Love bears all things, believes all things, hopes all things, endures all things. \n\n 1 Corinthians 13:4-7",
+        "If I speak in the tongues of men and of angels, but have not love, I am a noisy gong or a clanging cymbal. And if I have prophetic powers, and understand all mysteries and all knowledge, and if I have all faith, so as to remove mountains, but have not love, I am nothing. If I give away all I have, and if I deliver up my body to be burned, but have not love, I gain nothing. \n\n 1 Corinthians 13:1-3"
         ]
         return random.choice(verses)

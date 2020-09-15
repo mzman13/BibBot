@@ -1,19 +1,21 @@
-import os, time, logging, sys
+import os, time, logging, multiprocessing, requests
 from flask import Flask, request
 from pymessenger.bot import Bot
 from Planner import Planner
 
-startTime = time.time()
+# startTime = time.time()
 app = Flask(__name__)
 # ACCESS_TOKEN = os.environ['ACCESS_TOKEN']
 # VERIFY_TOKEN = os.environ['VERIFY_TOKEN']
 ACCESS_TOKEN = "EAAw80bZAYciMBAAZBcoXpnIxZANsm66HCatKZBJj1Hu8iFrd6a39BDSUe6PNvbcfx3qp7ideRbklDZA2Ej6KMwM5GlLFnqttArTrULVwJmdofr3B6JPRTVNp6SNoLVwBfLZC2HgE3QZBEzrsGtwyn9xxvYtJ6Ja7VHTHcJ8IJOisgZDZD"
 VERIFY_TOKEN = "PXuyXrrJXoX5m2jHqyVj4cQvpzUqXYqWTlO7BRSC7HVZVgo9la7Y7WA3L3xZZXZbkd4akW"
-
 users = {}
 
 logger = logging.getLogger('testlogger')
-formatter = logging.Formatter('%(filename)s - line: %(lineno)d - %(message)s')
+formatter = logging.Formatter("%(asctime)15s "
+                              "| %(filename)s "
+                              "| line: %(lineno)d "
+                              "| %(message)s")
 stdoutHandler = logging.StreamHandler()
 stdoutHandler.setFormatter(formatter)
 logger.addHandler(stdoutHandler)
@@ -46,17 +48,28 @@ def receive_message():
                     # Facebook Messenger ID for user so we know where to send response back to
                     recipient_id = message['sender']['id']
                     if recipient_id not in users:
-                        users[recipient_id] = Planner(Bot(ACCESS_TOKEN), logger)
+                        users[recipient_id] = Planner(Bot(ACCESS_TOKEN), recipient_id, logger)
                     messageText = message['message'].get('text')
                     try:
-                        users[recipient_id].process((messageText, recipient_id,))
+                        users[recipient_id].process((messageText,))
                     except:
                         logger.exception(f"ERROR: could not process message {messageText} for user {recipient_id}", exc_info=True)
     return "Message Processed"
 
+def pingApp():
+    """send get request every 25 min to prevent heroku from idling"""
+
+    while True:
+        time.sleep(1500)
+        hubChallenge = 1171759508
+        url = "https://bibbotapp.herokuapp.com/"
+        url = f"{url}/?hub.mode=subscribe&hub.challenge={hubChallenge}&hub.verify_token={VERIFY_TOKEN}"
+        requests.get(url)
+
 if __name__ == '__main__':
     app.run(debug=False, use_reloader=False)
-
+    p = multiprocessing.Process(target=pingApp, args=())
+    p.start()
 
 # why state machine running startPlan.next() after startPlan.run() and waiting for input? - checking if next state is none runs next()
 # why sending multiple POST requests per message? - watermark post request
@@ -68,19 +81,20 @@ if __name__ == '__main__':
 # better error message for no plan created yet / bad values
 # back - getReadingRate()
 # setCurrentReading() and getTomorrow() similar code
-# TODO: thread sleep until reminder time, then send message to ask if read. if no, moved today's reading to tomorrow
-# TODO: when waking up from idle, don't run welcome state
-# TODO: heroku postgres store data in case app shuts down
-# TODO: store userId in plannerContext?
-
-# TODO?: why take so long to process first message? - usually when there is unprocessed message by user
-# TODO?: option to read chronologically?
-# TODO?: have tutorials?
-# TODO?: what if user reads more than daily amount?
+# thread sleep until reminder time, then send message to ask if read. if no, moved today's reading to tomorrow. check if reminder already exists? how to kill thread?
+# store userId in plannerContext?
+# if reminderTime is 101pm, 111pm, 121pm
+# TODO?: simplify menu or remove it?
+# TODO?: ask if want to set reminder after starting plan
 # TODO?: if reading plan exists, and user tries starting new reading plan but errors, then current reading plan is gone? should still retain current reading plan
-# TODO?: option visit facebook page
-# TODO?: variable reading rate?
-# TODO?: reward system for reading
+# TODO: separate state for getting book, then chapter number
+
+#  why take so long to process first message? - usually when there is unprocessed message by user
+# TODO?: option to read chronologically?
+# TODO?: what if user reads more than daily amount?
+# TODO?: option link facebook page
+# TODO?: reward system for reading every day
+# TODO?: randomly get bible verse thru API
 """ 
 TODO: Test Cases: 
     today/tomorrowReading/endDate when plan not set?
@@ -107,15 +121,5 @@ TODO: Test Cases:
         current chp - revelation 20, rate - 3, next chap - revelation/genesis 1
         current chp - hebrews 1, rate - 56, next chap - revelation/genesis 1
     time:
-        -----------------------------------
-        colon            | no colon
-        -----------------------------------
-        space before am  | space after 'am'
-        -----------------------------------
-        3 - 4 digits     | 1 - 4 digits 
-        -----------------------------------
-        09:00am / 09:00 am / 12:00am 
-        9:30am / 9:30 am
-        9am / 9 am / 12am
-        930am / 930 am / 1230am
+        09:00am, 09:00 am, 12:00am , 9:30am, 9:30 am, 9am, 9 am, 12am, 930am, 930 am, 1230am, 1500, 15:30, 9, 1230, 101pm, hi, 1ty, 12amam, 1230amty, hi:00, 
     """

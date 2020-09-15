@@ -1,17 +1,21 @@
 import math
-from datetime import datetime, timedelta
+import datetime
 from Bible import bible
 
 
 class PlannerContext:
-    def __init__(self, messengerBot, logger):
+    def __init__(self, messengerBot, userId, reminderEvent, logger):
         self.readingRate = None
         self.currentBook = None
         self.currentChp = None
         self.nextBook = None
         self.nextChp = None
         self.today = None
+        self.userId = userId
+        self.reminderCreated = False
+        self.reminderTime = None
         self.bot = messengerBot
+        self.reminderEvent = reminderEvent
         self.logger = logger
 
     def __str__(self):
@@ -21,8 +25,8 @@ class PlannerContext:
         self.bot.send_text_message(userId, message)
 
     def updateToday(self):
-        if self.today and datetime.date(datetime.now()) > self.today:
-            self.today = datetime.date(datetime.now())
+        if self.today and datetime.datetime.now().date() > self.today:
+            self.today = datetime.datetime.now().date()
             self.setCurrentReading()
 
     def setCurrentReading(self):
@@ -75,6 +79,13 @@ class PlannerContext:
             nextChp = currentChp + self.readingRate
         return nextBook, nextChp
 
+    def missedReading(self, chpsRead):
+        self.nextChp = self.currentChp + chpsRead
+        self.nextBook = self.currentBook
+        if self.nextChp > bible[self.currentBook]['chapters']:
+            self.nextBook = bible[self.currentBook]['next']
+            self.nextChp = self.nextChp % bible[self.currentBook]['chapters']
+
     def getEndDateRemainingChps(self):
         # add remaining chapters in current book and remaining books until revelation
 
@@ -99,8 +110,39 @@ class PlannerContext:
         self.nextChp = None
         self.today = None
 
-    def createReminder(self):
-        pass
+    def setReminder(self, message):
+        try:
+            if 'am' in message:
+                messageValues = message.split('a')
+            elif 'pm' in message:
+                messageValues = message.split('p')
+            else:
+                return False
+
+            if ':' in message:
+                formatter = "%I:%M"
+            elif len(messageValues[0].rstrip()) <= 2:
+                formatter = "%I"
+            else:
+                # special case if reminder time is 101, 111, 112 read as 10:01
+                if len(messageValues[0].rstrip()) == 3 and messageValues[0].startswith('1'):
+                    message = '0' + message
+                formatter = "%I%M"
+
+            if ' ' in message:
+                formatter += ' %p'
+            else:
+                formatter += '%p'
+            self.reminderTime = datetime.datetime.strptime(message, formatter).time()
+            return True
+        except:
+            self.logger.exception("ERROR: could not parse time", exc_info=True)
+            return False
 
     def deleteReminder(self):
-        pass
+        self.reminderCreated = False
+        self.reminderTime = None
+        self.reminderEvent.set()
+
+    def setTempReminder(self, message):
+        self.tempTime = message
