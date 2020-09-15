@@ -11,11 +11,17 @@ class PlannerContext:
         self.nextBook = None
         self.nextChp = None
         self.today = None
+        self.tempCurrentBook = None
+        self.tempCurrentChp = None
+        self.tempReadingRate = None
+
         self.userId = userId
+        self.bot = messengerBot
+
         self.reminderCreated = False
         self.reminderTime = None
-        self.bot = messengerBot
         self.reminderEvent = reminderEvent
+
         self.logger = logger
 
     def __str__(self):
@@ -101,14 +107,6 @@ class PlannerContext:
                 remainingChps += info['chapters']
         remainingDays = math.ceil(remainingChps / self.readingRate)
         return remainingChps, remainingDays
-
-    def reset(self):
-        self.readingRate = None
-        self.currentBook = None
-        self.currentChp = None
-        self.nextBook = None
-        self.nextChp = None
-        self.today = None
 
     def setReminder(self, message):
         try:

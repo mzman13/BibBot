@@ -86,8 +86,8 @@ if __name__ == '__main__':
 # if reminderTime is 101pm, 111pm, 121pm
 # TODO?: simplify menu or remove it?
 # TODO?: ask if want to set reminder after starting plan
-# TODO?: if reading plan exists, and user tries starting new reading plan but errors, then current reading plan is gone? should still retain current reading plan
-# TODO: separate state for getting book, then chapter number
+# if reading plan exists, and user tries starting new reading plan but errors, then current reading plan is gone? should still retain current reading plan
+# separate state for getting book, then chapter number
 
 #  why take so long to process first message? - usually when there is unprocessed message by user
 # TODO?: option to read chronologically?
