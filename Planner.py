@@ -26,16 +26,15 @@ class Menu(State):
         plannerContext = event[1]
         eight = '8' + u'\u2060' + ')'
         response = "(Enter the number of the option you want)\n"\
-                   "1) Start New Reading Plan\n" \
-                   "2) Get Today's Reading\n" \
-                   "3) Get Tomorrow's Reading\n" \
-                   "4) Missed Today's Reading?\n" \
-                   "5) Get End Date\n" \
-                   "6) Set/Update a Reminder\n" \
-                   "7) Delete Reminder\n" \
+                   "1) Start new reading plan\n" \
+                   "2) Get today's reading\n" \
+                   "3) Get tomorrow's reading\n" \
+                   "4) Missed today's reading?\n" \
+                   "5) Get end date\n" \
+                   "6) Set/Update a reminder\n" \
+                   "7) Delete reminder\n" \
                    f"{eight} Tell me a random bible verse!\n"
         plannerContext.sendMessage(plannerContext.userId, response)
-        return response
 
     def next(self, event):
         self.transitions = {
@@ -61,7 +60,6 @@ class StartPlan(State):
         response = "What Book are you starting on?\n\n" \
                    "To go back, type back"
         plannerContext.sendMessage(plannerContext.userId, response)
-        return response
 
     def next(self, event):
         message = event[0].lower()
@@ -108,7 +106,6 @@ class GetStartingChapter(State):
         response = "What Chapter are you starting on?\n\n" \
                    "To go back, type back"
         plannerContext.sendMessage(plannerContext.userId, response)
-        return response
 
     def next(self, event):
         message = event[0].lower()
@@ -147,7 +144,6 @@ class GetReadingRate(State):
         response = "How many chapters will you read a day?\n\n" \
                    "To go back, type back"
         plannerContext.sendMessage(plannerContext.userId, response)
-        return response
 
     def next(self, event):
         message = event[0]
@@ -178,9 +174,6 @@ class GetReadingRate(State):
         return State.next(self, returnCode)
 
 class PlanCreated(State):
-    def __init__(self):
-        self.lastState = True
-
     def run(self, event):
         plannerContext = event[1]
         plannerContext.currentBook = plannerContext.tempCurrentBook
@@ -193,10 +186,22 @@ class PlanCreated(State):
         plannerContext.updateToday()
         response = f"Got it! The goal is to read {plannerContext.readingRate} chapters every day!\n\n{plannerContext.getTodayReading()}"
         plannerContext.sendMessage(plannerContext.userId, response)
-        return response
+        response = "Do you also want to set a reminder?"
+        plannerContext.sendMessage(plannerContext.userId, response)
 
     def next(self, event):
-        return None
+        message = event[0].lower()
+        plannerContext = event[1]
+        returnCode = 0
+
+        if message[0] == 'y':
+            returnCode = 1
+
+        self.transitions = {
+            0: Planner.menu,
+            1: Planner.setReminder
+        }
+        return State.next(self, returnCode)
 
 class TodayReading(State):
     def __init__(self):
@@ -207,16 +212,16 @@ class TodayReading(State):
         plannerContext.updateToday()
         if plannerContext.nextChp:
             response = plannerContext.getTodayReading()
+            plannerContext.sendMessage(plannerContext.userId, response)
             if plannerContext.nextBook == 'done':
                 celebrate = u'\U0001F389'
                 smile = u'\U0001F601'
                 highfive = u'\U0001F64C'
                 clap = u'\U0001F44F'
-                response = f"Congratulations!!! {celebrate}{celebrate}{celebrate}\nToday is the last day of your reading plan!{smile}{smile}{smile}\nGreat job on making it this far!{highfive}{highfive}{clap}"
+                response = f"Congratulations!!! {celebrate}{celebrate}{celebrate}\nToday's the last day of your reading plan!{smile}{smile}{smile}\nGreat job on making it this far!{highfive}{highfive}{clap}"
         else:
             response = "No reading plan found!\nPlease start a new reading plan!"
         plannerContext.sendMessage(plannerContext.userId, response)
-        return response
 
     def next(self, event):
         return None
@@ -233,7 +238,6 @@ class TomorrowReading(State):
         else:
             response = "No reading plan found!\nPlease start a new reading plan!"
         plannerContext.sendMessage(plannerContext.userId, response)
-        return response
 
     def next(self, event):
         return None
@@ -251,7 +255,6 @@ class EndDate(State):
         else:
             response = "No reading plan found!\nPlease start a new reading plan!"
         plannerContext.sendMessage(plannerContext.userId, response)
-        return response
 
     def next(self, event):
         return None
@@ -267,7 +270,6 @@ class MissedReading(State):
             response = "How many chapters did you read today?\n\n" \
                        "To go back, type back"
         plannerContext.sendMessage(plannerContext.userId, response)
-        return response
 
     def next(self, event):
         message = event[0]
@@ -303,7 +305,6 @@ class GetVerse(State):
         plannerContext = event[1]
         response = getRandomVerse()
         plannerContext.sendMessage(plannerContext.userId, response)
-        return response
 
     def next(self, event):
         return None

@@ -85,7 +85,7 @@ if __name__ == '__main__':
 # store userId in plannerContext?
 # if reminderTime is 101pm, 111pm, 121pm
 # TODO?: simplify menu or remove it?
-# TODO?: ask if want to set reminder after starting plan
+# ask if want to set reminder after starting plan
 # if reading plan exists, and user tries starting new reading plan but errors, then current reading plan is gone? should still retain current reading plan
 # separate state for getting book, then chapter number
 
@@ -95,6 +95,7 @@ if __name__ == '__main__':
 # TODO?: option link facebook page
 # TODO?: reward system for reading every day
 # TODO?: randomly get bible verse thru API
+# TODO?: unit tests
 """ 
 TODO: Test Cases: 
     today/tomorrowReading/endDate when plan not set?
