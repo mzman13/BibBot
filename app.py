@@ -59,16 +59,17 @@ def pingApp():
     """send get request every 25 min to prevent heroku from idling"""
 
     while True:
-        time.sleep(1500)
+        logger.info('pinging')
         hubChallenge = 1171759508
         url = "https://bibbotapp.herokuapp.com/"
         url = f"{url}/?hub.mode=subscribe&hub.challenge={hubChallenge}&hub.verify_token={VERIFY_TOKEN}"
         requests.get(url)
+        time.sleep(1500)
 
 if __name__ == '__main__':
-    app.run(debug=False, use_reloader=False)
     p = multiprocessing.Process(target=pingApp, args=())
     p.start()
+    app.run(debug=False, use_reloader=False)
 
 # why state machine running startPlan.next() after startPlan.run() and waiting for input? - checking if next state is none runs next()
 # why sending multiple POST requests per message? - watermark post request
