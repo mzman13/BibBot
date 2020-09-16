@@ -57,9 +57,11 @@ def receive_message():
 
 def pingApp():
     """send get request every 25 min to prevent heroku from idling"""
-
+    logger.info('in process')
     while True:
         logger.info('pinging')
+        print('pingingg')
+        sys.stdout.flush()
         hubChallenge = 1171759508
         url = "https://bibbotapp.herokuapp.com/"
         url = f"{url}/?hub.mode=subscribe&hub.challenge={hubChallenge}&hub.verify_token={VERIFY_TOKEN}"
@@ -67,6 +69,8 @@ def pingApp():
         time.sleep(15)
 
 if __name__ == '__main__':
+    logger.info("in main")
+    sys.stdout.flush()
     p = multiprocessing.Process(target=pingApp, args=())
     p.start()
     app.run(debug=False, use_reloader=False)
