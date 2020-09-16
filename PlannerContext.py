@@ -27,8 +27,8 @@ class PlannerContext:
     def __str__(self):
         return f"{self.readingRate} {self.currentBook} {self.currentChp} {self.nextBook} {self.nextChp} {self.today}"
 
-    def sendMessage(self, userId, message):
-        self.bot.send_text_message(userId, message)
+    def sendMessage(self, message):
+        self.bot.send_text_message(self.userId, message)
 
     def updateToday(self):
         if self.today and datetime.datetime.now().date() > self.today:
@@ -144,3 +144,16 @@ class PlannerContext:
 
     def setTempReminder(self, message):
         self.tempTime = message
+
+    def printMenu(self):
+        eight = '8' + u'\u2060' + ')'
+        response = "(Enter the number of the option you want)\n" \
+                   "1) Start new reading plan\n" \
+                   "2) Get today's reading\n" \
+                   "3) Get tomorrow's reading\n" \
+                   "4) Missed today's reading?\n" \
+                   "5) Get end date\n" \
+                   "6) Set/Update a reminder\n" \
+                   "7) Delete reminder\n" \
+                   f"{eight} Tell me a random bible verse!\n"
+        self.sendMessage(response)

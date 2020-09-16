@@ -3,12 +3,11 @@ from flask import Flask, request
 from pymessenger.bot import Bot
 from Planner import Planner
 
+
 # startTime = time.time()
 app = Flask(__name__)
-# ACCESS_TOKEN = os.environ['ACCESS_TOKEN']
-# VERIFY_TOKEN = os.environ['VERIFY_TOKEN']
-ACCESS_TOKEN = "EAAw80bZAYciMBAAZBcoXpnIxZANsm66HCatKZBJj1Hu8iFrd6a39BDSUe6PNvbcfx3qp7ideRbklDZA2Ej6KMwM5GlLFnqttArTrULVwJmdofr3B6JPRTVNp6SNoLVwBfLZC2HgE3QZBEzrsGtwyn9xxvYtJ6Ja7VHTHcJ8IJOisgZDZD"
-VERIFY_TOKEN = "PXuyXrrJXoX5m2jHqyVj4cQvpzUqXYqWTlO7BRSC7HVZVgo9la7Y7WA3L3xZZXZbkd4akW"
+ACCESS_TOKEN = os.environ['ACCESS_TOKEN']
+VERIFY_TOKEN = os.environ['VERIFY_TOKEN']
 users = {}
 
 logger = logging.getLogger('testlogger')
@@ -84,10 +83,12 @@ if __name__ == '__main__':
 # thread sleep until reminder time, then send message to ask if read. if no, moved today's reading to tomorrow. check if reminder already exists? how to kill thread?
 # store userId in plannerContext?
 # if reminderTime is 101pm, 111pm, 121pm
-# TODO?: simplify menu or remove it?
+# remove menu, add help option
+# validate 1. | 1) | 1 | one
 # ask if want to set reminder after starting plan
 # if reading plan exists, and user tries starting new reading plan but errors, then current reading plan is gone? should still retain current reading plan
 # separate state for getting book, then chapter number
+# TODO: unit tests
 
 #  why take so long to process first message? - usually when there is unprocessed message by user
 # TODO?: option to read chronologically?
@@ -95,7 +96,6 @@ if __name__ == '__main__':
 # TODO?: option link facebook page
 # TODO?: reward system for reading every day
 # TODO?: randomly get bible verse thru API
-# TODO?: unit tests
 """ 
 TODO: Test Cases: 
     today/tomorrowReading/endDate when plan not set?

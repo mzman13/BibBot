@@ -99,7 +99,7 @@ def getRandomVerse():
         "He gives power to the faint, and to him who has no might he increases strength. Even youths shall faint and be weary, and young men shall fall exhausted; but they who wait for the LORD shall renew their strength; they shall mount up with wings like eagles; they shall run and not be weary; they shall walk and not faint. \n\nIsaiah 40:29-31",
         "Trust in the Lord with all your heart, and do not lean on your own understanding. In all your ways acknowledge him, and he will make straight your paths. \n\nProverbs 3:5-6",
         "Let all that you do be done in love. \n\n1 Corinthians 16:14",
-        "for God gave us a spirit not of fear but of power and love and self-control. \n\n2 Timothy 1:7",
+        "For God gave us a spirit not of fear but of power and love and self-control. \n\n2 Timothy 1:7",
         "For you formed my inward parts; you knitted me together in my mother's womb. I praise you, for I am fearfully and wonderfully made. Wonderful are your works; my soul knows it very well. \n\nPsalm 139:13-14",
         "Have nothing to do with irreverent, silly myths. Rather train yourself for godliness; for while bodily training is of some value, godliness is of value in every way, as it holds promise for the present life and also for the life to come. The saying is trustworthy and deserving of full acceptance. \n\n1 Timothy 4:7-9",
         "Why are you cast down, O my soul, and why are you in turmoil within me? Hope in God; for I shall again praise him, my salvation and my God. \n\nPsalm 42:11",
