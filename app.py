@@ -1,4 +1,4 @@
-import os, time, logging, multiprocessing, requests, sys
+import os, time, logging, sys
 from flask import Flask, request
 from pymessenger.bot import Bot
 from Planner import Planner
@@ -14,12 +14,11 @@ formatter = logging.Formatter("%(asctime)15s "
                               "| %(filename)s "
                               "| line: %(lineno)d "
                               "| %(message)s")
-stdoutHandler = logging.StreamHandler(sys.stdout)
+stdoutHandler = logging.StreamHandler()
 stdoutHandler.setFormatter(formatter)
 logger.addHandler(stdoutHandler)
 logger.setLevel(logging.INFO)
-logger.info(f"bot start up {time.time()}")
-app.logger.addHandler(stdoutHandler)
+# logger.info(f"bot start up {time.time()}")
 
 def verify_fb_token(token_sent):
     # take token sent by facebook and verify it matches the verify token you sent
@@ -31,13 +30,7 @@ def verify_fb_token(token_sent):
 # We will receive messages that Facebook sends our bot at this endpoint
 @app.route("/", methods=['GET', 'POST'])
 def receive_message():
-    if request.method == 'GET':
-        """Before allowing people to message your bot, Facebook has implemented a verify token
-        that confirms all requests that your bot receives came from Facebook."""
-        token_sent = request.args.get("hub.verify_token")
-        response = verify_fb_token(token_sent)
-        return response
-    else:
+    if request.method == 'POST':
         # get whatever message a user sent the bot
         output = request.get_json()
         for event in output['entry']:
@@ -53,26 +46,15 @@ def receive_message():
                         users[recipient_id].process((messageText,))
                     except:
                         logger.exception(f"ERROR: could not process message {messageText} for user {recipient_id}", exc_info=True)
-    return "Message Processed"
-
-def pingApp():
-    """send get request every 25 min to prevent heroku from idling"""
-    logger.info('in process')
-    while True:
-        logger.info('pinging')
-        print('pingingg')
-        sys.stdout.flush()
-        hubChallenge = 1171759508
-        url = "https://bibbotapp.herokuapp.com/"
-        url = f"{url}/?hub.mode=subscribe&hub.challenge={hubChallenge}&hub.verify_token={VERIFY_TOKEN}"
-        requests.get(url)
-        time.sleep(15)
+        return "Message Processed"
+    else:
+        """Before allowing people to message your bot, Facebook has implemented a verify token
+                that confirms all requests that your bot receives came from Facebook."""
+        token_sent = request.args.get("hub.verify_token")
+        response = verify_fb_token(token_sent)
+        return response
 
 if __name__ == '__main__':
-    logger.info("in main")
-    sys.stdout.flush()
-    p = multiprocessing.Process(target=pingApp, args=())
-    p.start()
     app.run(debug=False, use_reloader=False)
 
 # why state machine running startPlan.next() after startPlan.run() and waiting for input? - checking if next state is none runs next()
