@@ -1,10 +1,9 @@
-import os, time, logging, multiprocessing, requests
+import os, time, logging, multiprocessing, requests, sys
 from flask import Flask, request
 from pymessenger.bot import Bot
 from Planner import Planner
 
 
-# startTime = time.time()
 app = Flask(__name__)
 ACCESS_TOKEN = os.environ['ACCESS_TOKEN']
 VERIFY_TOKEN = os.environ['VERIFY_TOKEN']
@@ -15,11 +14,12 @@ formatter = logging.Formatter("%(asctime)15s "
                               "| %(filename)s "
                               "| line: %(lineno)d "
                               "| %(message)s")
-stdoutHandler = logging.StreamHandler()
+stdoutHandler = logging.StreamHandler(sys.stdout)
 stdoutHandler.setFormatter(formatter)
 logger.addHandler(stdoutHandler)
 logger.setLevel(logging.INFO)
-# logger.info(f"bot start up {time.time() - startTime}")
+logger.info(f"bot start up {time.time()}")
+app.logger.addHandler(stdoutHandler)
 
 def verify_fb_token(token_sent):
     # take token sent by facebook and verify it matches the verify token you sent
@@ -64,7 +64,7 @@ def pingApp():
         url = "https://bibbotapp.herokuapp.com/"
         url = f"{url}/?hub.mode=subscribe&hub.challenge={hubChallenge}&hub.verify_token={VERIFY_TOKEN}"
         requests.get(url)
-        time.sleep(1500)
+        time.sleep(15)
 
 if __name__ == '__main__':
     p = multiprocessing.Process(target=pingApp, args=())
