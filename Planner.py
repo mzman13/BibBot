@@ -6,6 +6,12 @@ from Bible import bible, getRandomVerse
 from PlannerContext import PlannerContext
 
 
+def checkYesMessage(message):
+    if message[0] == 'y' or message.startswith('sur') or message.startswith('ok') or message.startswith('alright'):
+        return True
+    else:
+        return False
+
 class Welcome(State):
     def run(self, event):
         plannerContext = event[1]
@@ -16,7 +22,7 @@ class Welcome(State):
         plannerContext.sendMessage(response)
 
     def next(self, event):
-        message = event[0].lower()
+        message = event[0]
         self.transitions = {
             message: Planner.menuTutorial
         }
@@ -27,7 +33,7 @@ class MenuTutorial(State):
         pass
 
     def next(self, event):
-        message = event[0].lower()
+        message = event[0]
         plannerContext = event[1]
         returnCode = 0
 
@@ -52,7 +58,7 @@ class StartPlanTutorial(State):
         pass
 
     def next(self, event):
-        message = event[0].lower()
+        message = event[0]
         plannerContext = event[1]
         returnCode = 0
 
@@ -73,7 +79,7 @@ class Menu(State):
         pass
 
     def next(self, event):
-        message = event[0].lower()
+        message = event[0]
         plannerContext = event[1]
         returnCode = message
 
@@ -124,7 +130,7 @@ class StartPlan(State):
         plannerContext.sendMessage(response)
 
     def next(self, event):
-        message = event[0].lower()
+        message = event[0]
         plannerContext = event[1]
         returnCode = 0
         messageValues = message.split(' ')
@@ -176,7 +182,7 @@ class GetStartingChapter(State):
         plannerContext.sendMessage(response)
 
     def next(self, event):
-        message = event[0].lower()
+        message = event[0]
         plannerContext = event[1]
         returnCode = 0
         messageValues = message.split(' ')
@@ -217,7 +223,7 @@ class GetReadingRate(State):
         plannerContext.sendMessage(response)
 
     def next(self, event):
-        message = event[0].lower()
+        message = event[0]
         plannerContext = event[1]
         returnCode = 0
 
@@ -266,14 +272,14 @@ class PlanCreated(State):
         plannerContext.sendMessage(response)
 
     def next(self, event):
-        message = event[0].lower()
+        message = event[0]
         plannerContext = event[1]
         returnCode = 0
 
         if message in ('help', 'menu'):
             plannerContext.printMenu()
             returnCode = 1
-        elif message[0] == 'y':
+        elif checkYesMessage(message):
             returnCode = 2
         else:
             response = "Finished creating plan"
@@ -359,7 +365,7 @@ class MissedReading(State):
         plannerContext = event[1]
         returnCode = 0
 
-        if re.match(r"^\d+$", message.lower()):
+        if re.match(r"^\d+$", message):
             message = int(message)
             if message >= plannerContext.readingRate:
                 response = "You read all your chapters for today! Good Job! :)"
@@ -412,7 +418,7 @@ class SetReminder(State):
         plannerContext.sendMessage(response)
 
     def next(self, event):
-        message = event[0].lower()
+        message = event[0]
         plannerContext = event[1]
         returnCode = 0
         response = ''
@@ -452,7 +458,7 @@ class GetAmPm(State):
         plannerContext.sendMessage(response)
 
     def next(self, event):
-        message = event[0].lower()
+        message = event[0]
         plannerContext = event[1]
         returnCode = 0
         response = ''
@@ -496,7 +502,7 @@ class DeleteReminder(State):
         plannerContext.sendMessage(response)
 
     def next(self, event):
-        message = event[0].lower()
+        message = event[0]
         plannerContext = event[1]
         returnCode = 0
 
@@ -504,7 +510,7 @@ class DeleteReminder(State):
             plannerContext.printMenu()
             response = ''
             returnCode = 1
-        elif message[0] == 'y':
+        elif checkYesMessage(message):
             plannerContext.deleteReminder()
             response = "Okay, I deleted your reminder!"
         else:
@@ -526,7 +532,7 @@ class ProcessReminderResponse(State):
         self.previousState = event[2]
 
     def next(self, event):
-        message = event[0].lower()
+        message = event[0]
         plannerContext = event[1]
         returnCode = 0
 
@@ -562,7 +568,8 @@ class Planner(StateMachine):
         if self.currentState != Planner.setReminder:
             self.reminderLock.acquire()
 
-        event = (event[0], self.plannerContext,)
+
+        event = (self.getLowerMessage(event[0]), self.plannerContext,)
         # self.plannerContext.logger.info(f"Planner Before: message - {event[0]}, {self.plannerContext} in {threading.current_thread().name}")
         # self.plannerContext.logger.info(f"current state 1 - {self.currentState}")
         self.checkWelcomeState(event)
@@ -575,6 +582,13 @@ class Planner(StateMachine):
 
         if self.reminderLock.locked():
             self.reminderLock.release()
+
+    def getLowerMessage(self, m):
+        try:
+            message = m.lower()
+        except:
+            message = m
+        return message
 
     def checkWelcomeState(self, event):
         if self.currentState == Planner.welcome:

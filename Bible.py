@@ -107,6 +107,7 @@ def getRandomVerse():
         "Jesus said to him, “I am the way, and the truth, and the life. No one comes to the Father except through me. \n\nJohn 14:6",
         "So now faith, hope, and love abide, these three; but the greatest of these is love. \n\n1 Corinthians 13:13",
         "Love is patient and kind; love does not envy or boast; it is not arrogant or rude. It does not insist on its own way; it is not irritable or resentful; it does not rejoice at wrongdoing, but rejoices with the truth. Love bears all things, believes all things, hopes all things, endures all things. \n\n 1 Corinthians 13:4-7",
-        "If I speak in the tongues of men and of angels, but have not love, I am a noisy gong or a clanging cymbal. And if I have prophetic powers, and understand all mysteries and all knowledge, and if I have all faith, so as to remove mountains, but have not love, I am nothing. If I give away all I have, and if I deliver up my body to be burned, but have not love, I gain nothing. \n\n 1 Corinthians 13:1-3"
+        "If I speak in the tongues of men and of angels, but have not love, I am a noisy gong or a clanging cymbal. And if I have prophetic powers, and understand all mysteries and all knowledge, and if I have all faith, so as to remove mountains, but have not love, I am nothing. If I give away all I have, and if I deliver up my body to be burned, but have not love, I gain nothing. \n\n 1 Corinthians 13:1-3",
+        "For God so loved the world, that he gave his one and only Son, so that whoever believes in him should not perish, but have eternal life. \n\nJohn 3:16"
         ]
         return random.choice(verses)

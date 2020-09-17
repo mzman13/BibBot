@@ -75,6 +75,8 @@ if __name__ == '__main__':
 # ask if want to set reminder after starting plan
 # if reading plan exists, and user tries starting new reading plan but errors, then current reading plan is gone? should still retain current reading plan
 # separate state for getting book, then chapter number
+# for yes/no questions, accepted answers are (yes, yup, sure, alright, ok, )
+# what if user enters option that can't be lowercase? lock is stuck and next message tries to acquire lock but timeouts
 # TODO: unit tests
 
 #  why take so long to process first message? - usually when there is unprocessed message by user
