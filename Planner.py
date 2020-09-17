@@ -588,6 +588,8 @@ class Planner(StateMachine):
             message = m.lower()
         except:
             message = m
+            if message is None:
+                message = ''
         return message
 
     def checkWelcomeState(self, event):
