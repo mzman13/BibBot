@@ -78,11 +78,11 @@ if __name__ == '__main__':
 # for yes/no questions, accepted answers are (yes, yup, sure, alright, ok, )
 # what if user enters option that can't be lowercase? lock is stuck and next message tries to acquire lock but timeouts
 # TODO: unit tests
-
-#  why take so long to process first message? - usually when there is unprocessed message by user
-# TODO?: option to read chronologically?
+# TODO: option to read chronologically?
 # TODO?: what if user reads more than daily amount?
 # TODO?: option link facebook page
+
+#  why take so long to process first message? - usually when there is unprocessed message by user
 # TODO?: reward system for reading every day
 # TODO?: randomly get bible verse thru API
 """ 

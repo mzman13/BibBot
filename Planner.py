@@ -2,7 +2,7 @@ import re, threading, time
 from datetime import datetime, timedelta
 from State import State
 from StateMachine import StateMachine
-from Bible import bible, getRandomVerse
+from Bible import getRandomVerse
 from PlannerContext import PlannerContext
 
 
@@ -167,7 +167,7 @@ class StartPlan(State):
         return State.next(self, returnCode)
 
     def processResponse(self, plannerContext, book):
-        if book not in bible:
+        if book not in plannerContext.bible:
             response = "Sorry, I couldn't find the name of the book you wanted. Did you misspell it?"
             plannerContext.sendMessage(response)
             return 1
@@ -208,8 +208,8 @@ class GetStartingChapter(State):
         return State.next(self, returnCode)
 
     def processResponse(self, plannerContext, chp):
-        if chp > bible[plannerContext.tempCurrentBook]['chapters']:
-            response = f"Sorry, your starting chapter is more than the number of chapters in {plannerContext.tempCurrentBook.title()}. Please enter a starting chapter less than {bible[plannerContext.tempCurrentBook]['chapters']}"
+        if chp > plannerContext.bible[plannerContext.tempCurrentBook]['chapters']:
+            response = f"Sorry, your starting chapter is more than the number of chapters in {plannerContext.tempCurrentBook.title()}. Please enter a starting chapter less than {plannerContext.bible[plannerContext.tempCurrentBook]['chapters']}"
             plannerContext.sendMessage(response)
             return 1
         plannerContext.tempCurrentChp = chp
@@ -568,7 +568,6 @@ class Planner(StateMachine):
         if self.currentState != Planner.setReminder:
             self.reminderLock.acquire()
 
-
         event = (self.getLowerMessage(event[0]), self.plannerContext,)
         # self.plannerContext.logger.info(f"Planner Before: message - {event[0]}, {self.plannerContext} in {threading.current_thread().name}")
         # self.plannerContext.logger.info(f"current state 1 - {self.currentState}")
@@ -624,23 +623,24 @@ class Planner(StateMachine):
             current = datetime.now().time()
             sleepTime = abs((timedelta(hours=self.plannerContext.reminderTime.hour, minutes=self.plannerContext.reminderTime.minute)
                              - timedelta(hours=current.hour, minutes=current.minute)).seconds) + 60
-            # self.plannerContext.logger.info(f'sleeping for {sleepTime} in {threading.current_thread().name}')
+            self.plannerContext.logger.info(f'sleeping for {sleepTime} in {threading.current_thread().name}')
             while not reminderEvent.wait(sleepTime):
                 previousState = self.currentState
                 event = ('', self.plannerContext, previousState,)
                 with reminderLock:
+                    self.plannerContext.logger.info("reminding user now!")
                     self.currentState = Planner.processReminderResponse
                     self.currentState.run(event)
 
                 current = datetime.now().time()
                 sleepTime = abs((timedelta(hours=reminderTime.hour, minutes=reminderTime.minute)
                                  - timedelta(hours=current.hour, minutes=current.minute)).seconds) + 60
-                # self.plannerContext.logger.info(f"sleeping for {sleepTime} seconds")
+                self.plannerContext.logger.info(f"sleeping for {sleepTime} seconds")
         except:
             self.plannerContext.logger.exception("ERROR: could not remind user!", exc_info=True)
         finally:
             reminderEvent.clear()
-            # self.plannerContext.logger.info(f"event cleared, killed thread {reminderEvent.is_set()}")
+            self.plannerContext.logger.info(f"event cleared, killed thread {reminderEvent.is_set()}")
 
 Planner.welcome = Welcome()
 Planner.menuTutorial = MenuTutorial()

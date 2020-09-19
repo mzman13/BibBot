@@ -1,6 +1,6 @@
 import math
 import datetime
-from Bible import bible
+from Bible import BibleManager
 
 
 class PlannerContext:
@@ -14,6 +14,7 @@ class PlannerContext:
         self.tempCurrentBook = None
         self.tempCurrentChp = None
         self.tempReadingRate = None
+        self.bible = BibleManager(getChrono=False).bible
 
         self.userId = userId
         self.bot = messengerBot
@@ -47,7 +48,7 @@ class PlannerContext:
             nextChp = '22'
         else:
             nextBook = self.nextBook if (self.nextChp > 1) else self.currentBook
-            nextChp = (self.nextChp - 1) if (self.nextChp > 1) else bible[self.currentBook]['chapters']
+            nextChp = (self.nextChp - 1) if (self.nextChp > 1) else self.bible[self.currentBook]['chapters']
         return f"Today's reading is from {self.currentBook.title()} {self.currentChp} to {nextBook.title()} {nextChp}"
 
     def getTomorrowReading(self):
@@ -60,7 +61,7 @@ class PlannerContext:
             currentChp = self.nextChp
             nextBook, nextChp = self._calculateNext(currentBook, currentChp)
             nextBook = nextBook if (nextChp > 1) else currentBook
-            nextChp = (nextChp - 1) if (nextChp > 1) else bible[currentBook]['chapters']
+            nextChp = (nextChp - 1) if (nextChp > 1) else self.bible[currentBook]['chapters']
 
         if nextBook == 'done':
             nextBook = 'revelation'
@@ -68,18 +69,18 @@ class PlannerContext:
         return f"Tomorrow's reading is from {currentBook.title()} {currentChp} to {nextBook.title()} {nextChp}"
 
     def _calculateNext(self, currentBook, currentChp):
-        if currentChp + self.readingRate > bible[currentBook]['chapters']:
-            total = (currentChp + self.readingRate) - bible[currentBook]['chapters']
+        if currentChp + self.readingRate > self.bible[currentBook]['chapters']:
+            total = (currentChp + self.readingRate) - self.bible[currentBook]['chapters']
             current = currentBook
             while True:
-                next = bible[current]['next']
-                if next == 'done' or bible[next]['chapters'] > total:
+                next = self.bible[current]['next']
+                if next == 'done' or self.bible[next]['chapters'] > total:
                     nextBook = next
                     nextChp = total
                     break
                 else:
                     current = next
-                    total -= bible[current]['chapters']
+                    total -= self.bible[current]['chapters']
         else:
             nextBook = currentBook
             nextChp = currentChp + self.readingRate
@@ -88,16 +89,16 @@ class PlannerContext:
     def missedReading(self, chpsRead):
         self.nextChp = self.currentChp + chpsRead
         self.nextBook = self.currentBook
-        if self.nextChp > bible[self.currentBook]['chapters']:
-            self.nextBook = bible[self.currentBook]['next']
-            self.nextChp = self.nextChp % bible[self.currentBook]['chapters']
+        if self.nextChp > self.bible[self.currentBook]['chapters']:
+            self.nextBook = self.bible[self.currentBook]['next']
+            self.nextChp = self.nextChp % self.bible[self.currentBook]['chapters']
 
     def getEndDateRemainingChps(self):
         # add remaining chapters in current book and remaining books until revelation
 
         remainingChps = 0
         foundNext = False
-        for book, info in bible.items():
+        for book, info in self.bible.items():
             if self.nextBook == 'done':
                 break
             elif self.nextBook == book:
