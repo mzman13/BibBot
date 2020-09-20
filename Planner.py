@@ -569,14 +569,14 @@ class Planner(StateMachine):
             self.reminderLock.acquire()
 
         event = (self.getLowerMessage(event[0]), self.plannerContext,)
-        # self.plannerContext.logger.info(f"Planner Before: message - {event[0]}, {self.plannerContext} in {threading.current_thread().name}")
-        # self.plannerContext.logger.info(f"current state - {self.currentState}")
+        self.plannerContext.logger.info(f"Planner Before: message - {event[0]}, {self.plannerContext} in {threading.current_thread().name}")
+        self.plannerContext.logger.info(f"current state - {self.currentState}")
         self.checkWelcomeState(event)
         self.currentState = self.currentState.next(event)
-        # self.plannerContext.logger.info(f"next state - {self.currentState}")
+        self.plannerContext.logger.info(f"next state - {self.currentState}")
         self.currentState.run(event)
         self.checkLastState()
-        # self.plannerContext.logger.info(f"Planner After: message - {event[0]}, lastState - {self.currentState.lastState}, {self.plannerContext}")
+        self.plannerContext.logger.info(f"Planner After: message - {event[0]}, lastState - {self.currentState.lastState}, {self.plannerContext}")
         self.checkSetReminderState()
 
         if self.reminderLock.locked():
@@ -626,7 +626,7 @@ class Planner(StateMachine):
 
         try:
             sleepTime = calculateSleepTime(self.plannerContext, reminderTime, datetime.now())
-            # self.plannerContext.logger.info(f'sleeping for {sleepTime} in {threading.current_thread().name}')
+            self.plannerContext.logger.info(f'sleeping for {sleepTime} in {threading.current_thread().name}')
 
             while not reminderEvent.wait(sleepTime):
                 previousState = self.currentState
@@ -642,7 +642,7 @@ class Planner(StateMachine):
             self.plannerContext.logger.exception("ERROR: could not remind user!", exc_info=True)
         finally:
             reminderEvent.clear()
-            # self.plannerContext.logger.info(f"event cleared, killed thread {reminderEvent.is_set()}")
+            self.plannerContext.logger.info(f"event cleared, killed thread {reminderEvent.is_set()}")
 
 Planner.welcome = Welcome()
 Planner.menuTutorial = MenuTutorial()
