@@ -163,6 +163,7 @@ class PlannerContext:
         self.tempTime = message
 
     def setOffSet(self, timestamp):
+        self.logger.info(f"timestamp context is {'timestamp'}")
         userTime = datetime.datetime.fromtimestamp(int(timestamp)/1000).time()
         self.logger.info(f"user time is {userTime}")
         currentTime = datetime.datetime.now().time()
