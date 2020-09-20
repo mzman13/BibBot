@@ -263,7 +263,7 @@ class PlanCreated(State):
             plannerContext.nextBook = None
             plannerContext.nextChp = None
             plannerContext.readingRate = plannerContext.tempReadingRate
-            plannerContext.today = datetime.date(datetime.now())
+            plannerContext.today = plannerContext.getOffSetTime(datetime.now()).date()
             plannerContext.setCurrentReading()
             plannerContext.updateToday()
             response = f"Got it! The goal is to read {plannerContext.readingRate} chapters every day!\n\n{plannerContext.getTodayReading()}"
@@ -372,7 +372,7 @@ class MissedReading(State):
                 plannerContext.sendMessage(response)
             elif message < plannerContext.readingRate:
                 plannerContext.missedReading(message)
-                response = f"You read {message}/{plannerContext.readingRate} chapters today. Keep up the discipline! You can do it!"
+                response = f"You read {message}/{plannerContext.readingRate} chapters today.\nKeep up the discipline! You can do it!"
                 plannerContext.sendMessage(response)
         elif message.lower() == 'cancel':
             plannerContext.sendMessage('cancelled')
@@ -554,7 +554,7 @@ class ProcessReminderResponse(State):
         return State.next(self, returnCode)
 
 class Planner(StateMachine):
-    def __init__(self, messengerBot, userId, logger):
+    def __init__(self, messengerBot, userId, logger, timestamp):
         """
         reminderEvent: threading event to signal when to stop the reminder thread
         reminderLock: threading lock to make sure user finishes whatever state they're in before getting reminded
@@ -562,7 +562,7 @@ class Planner(StateMachine):
         StateMachine.__init__(self, Planner.welcome)
         self.reminderEvent = threading.Event()
         self.reminderLock = threading.Lock()
-        self.plannerContext = PlannerContext(messengerBot, userId, self.reminderEvent, logger)
+        self.plannerContext = PlannerContext(messengerBot, userId, self.reminderEvent, logger, timestamp)
 
     def process(self, event):
         if self.currentState != Planner.setReminder:
@@ -570,10 +570,10 @@ class Planner(StateMachine):
 
         event = (self.getLowerMessage(event[0]), self.plannerContext,)
         # self.plannerContext.logger.info(f"Planner Before: message - {event[0]}, {self.plannerContext} in {threading.current_thread().name}")
-        # self.plannerContext.logger.info(f"current state 1 - {self.currentState}")
+        # self.plannerContext.logger.info(f"current state - {self.currentState}")
         self.checkWelcomeState(event)
         self.currentState = self.currentState.next(event)
-        # self.plannerContext.logger.info(f"next state 2 - {self.currentState}")
+        # self.plannerContext.logger.info(f"next state - {self.currentState}")
         self.currentState.run(event)
         self.checkLastState()
         # self.plannerContext.logger.info(f"Planner After: message - {event[0]}, lastState - {self.currentState.lastState}, {self.plannerContext}")
@@ -618,29 +618,31 @@ class Planner(StateMachine):
         when user deletes reminder, reminderEvent is set and .wait() will return True and exit loop. Then, unset the event for the next reminder thread
         +60 seconds because will remind user twice if current time still == reminder time
         """
-        try:
+        def calculateSleepTime(plannerContext, reminder, current):
+            offSetCurrent = plannerContext.getOffSetTime(current)
+            return abs((timedelta(hours=reminder.hour, minutes=reminder.minute)
+                        - timedelta(hours=offSetCurrent.hour, minutes=offSetCurrent.minute)).seconds) \
+                        + 60
 
-            current = datetime.now().time()
-            sleepTime = abs((timedelta(hours=self.plannerContext.reminderTime.hour, minutes=self.plannerContext.reminderTime.minute)
-                             - timedelta(hours=current.hour, minutes=current.minute)).seconds) + 60
-            self.plannerContext.logger.info(f'sleeping for {sleepTime} in {threading.current_thread().name}')
+        try:
+            sleepTime = calculateSleepTime(self.plannerContext, reminderTime, datetime.now())
+            # self.plannerContext.logger.info(f'sleeping for {sleepTime} in {threading.current_thread().name}')
+
             while not reminderEvent.wait(sleepTime):
                 previousState = self.currentState
                 event = ('', self.plannerContext, previousState,)
                 with reminderLock:
-                    self.plannerContext.logger.info("reminding user now!")
+                    # self.plannerContext.logger.info("reminding user now!")
                     self.currentState = Planner.processReminderResponse
                     self.currentState.run(event)
 
-                current = datetime.now().time()
-                sleepTime = abs((timedelta(hours=reminderTime.hour, minutes=reminderTime.minute)
-                                 - timedelta(hours=current.hour, minutes=current.minute)).seconds) + 60
-                self.plannerContext.logger.info(f"sleeping for {sleepTime} seconds")
+                sleepTime = calculateSleepTime(self.plannerContext, reminderTime, datetime.now())
+                # self.plannerContext.logger.info(f"sleeping for {sleepTime} seconds")
         except:
             self.plannerContext.logger.exception("ERROR: could not remind user!", exc_info=True)
         finally:
             reminderEvent.clear()
-            self.plannerContext.logger.info(f"event cleared, killed thread {reminderEvent.is_set()}")
+            # self.plannerContext.logger.info(f"event cleared, killed thread {reminderEvent.is_set()}")
 
 Planner.welcome = Welcome()
 Planner.menuTutorial = MenuTutorial()

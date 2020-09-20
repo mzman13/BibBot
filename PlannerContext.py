@@ -4,7 +4,7 @@ from Bible import BibleManager
 
 
 class PlannerContext:
-    def __init__(self, messengerBot, userId, reminderEvent, logger):
+    def __init__(self, messengerBot, userId, reminderEvent, logger, timestamp):
         self.readingRate = None
         self.currentBook = None
         self.currentChp = None
@@ -18,22 +18,32 @@ class PlannerContext:
 
         self.userId = userId
         self.bot = messengerBot
+        self.logger = logger
 
         self.reminderCreated = False
         self.reminderTime = None
         self.reminderEvent = reminderEvent
-
-        self.logger = logger
+        self.offset = self.setOffSet(timestamp)
 
     def __str__(self):
-        return f"{self.readingRate} {self.currentBook} {self.currentChp} {self.nextBook} {self.nextChp} {self.today}"
+        return f"{{reading rate: {self.readingRate}, " \
+               f"currentBook: {self.currentBook}, " \
+               f"currentChp: {self.currentChp}, " \
+               f"nextBook: {self.nextBook}, " \
+               f"nextChp: {self.nextChp}, " \
+               f"today: {self.today}, " \
+               f"userId: {self.userId}, " \
+               f"reminderCreated: {self.reminderCreated}, " \
+               f"reminderTime: {self.reminderTime}, " \
+               f"offset: {self.offset}}}"
 
     def sendMessage(self, message):
         self.bot.send_text_message(self.userId, message)
 
     def updateToday(self):
-        if self.today and datetime.datetime.now().date() > self.today:
-            self.today = datetime.datetime.now().date()
+        now = self.getOffSetTime(datetime.datetime.now()).date()
+        if self.today and now > self.today:
+            self.today = now
             self.setCurrentReading()
 
     def setCurrentReading(self):
@@ -48,7 +58,13 @@ class PlannerContext:
             nextChp = '22'
         else:
             nextBook = self.nextBook if (self.nextChp > 1) else self.currentBook
-            nextChp = (self.nextChp - 1) if (self.nextChp > 1) else self.bible[self.currentBook]['chapters']
+            if self.nextChp > 1:
+                if self.nextBook == 'genesis':
+                    nextChp = self.nextChp - 1
+                else:
+                    nextChp = self.bible[self.currentBook]['chapters']
+            else:
+                nextChp = self.nextChp - 1
         return f"Today's reading is from {self.currentBook.title()} {self.currentChp} to {nextBook.title()} {nextChp}"
 
     def getTomorrowReading(self):
@@ -145,6 +161,24 @@ class PlannerContext:
 
     def setTempReminder(self, message):
         self.tempTime = message
+
+    def setOffSet(self, timestamp):
+        userTime = datetime.datetime.fromtimestamp(int(timestamp)/1000).time()
+        currentTime = datetime.datetime.now().time()
+        offset = abs((datetime.timedelta(hours=currentTime.hour, minutes=currentTime.minute)
+                     - datetime.timedelta(hours=userTime.hour, minutes=userTime.minute)).seconds)
+        if currentTime > userTime:
+            return offset * -1
+        else:
+            return offset
+
+    def getOffSetTime(self, currentDateTime):
+        # if utc time ahead of local time, subtract offset from utc time
+        if self.offset < 0:
+            return currentDateTime - datetime.timedelta(seconds=abs(self.offset))
+        # if local time ahead of utc time, add offset to utc time
+        else:
+            return currentDateTime + datetime.timedelta(seconds=self.offset)
 
     def printMenu(self):
         eight = '8' + u'\u2060' + ')'
