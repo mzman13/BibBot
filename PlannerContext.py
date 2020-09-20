@@ -163,9 +163,9 @@ class PlannerContext:
         self.tempTime = message
 
     def setOffSet(self, timestamp):
-        self.logger.info(f"timestamp context is {'timestamp'}")
+        self.logger.info(f"timestamp context is {timestamp}")
         userTime = datetime.datetime.fromtimestamp(int(timestamp)/1000).time()
-        self.logger.info(f"user time is {userTime}")
+        self.logger.info(f"user time is {datetime.datetime.fromtimestamp(timestamp/1000)}")
         currentTime = datetime.datetime.now().time()
         self.logger.info(f"current time is {currentTime}")
         offset = abs((datetime.timedelta(hours=currentTime.hour, minutes=currentTime.minute)

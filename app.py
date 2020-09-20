@@ -41,8 +41,8 @@ def receive_message():
                     # Facebook Messenger ID for user so we know where to send response back to
                     recipient_id = message['sender']['id']
                     if recipient_id not in users:
-                        users[recipient_id] = Planner(Bot(ACCESS_TOKEN), recipient_id, logger, message['timestamp'])
                         logger.info(f"timestamp is {message['timestamp']}")
+                        users[recipient_id] = Planner(Bot(ACCESS_TOKEN), recipient_id, logger, message['timestamp'])
                     messageText = message['message'].get('text')
                     try:
                         users[recipient_id].process((messageText,))
