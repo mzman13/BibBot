@@ -59,12 +59,12 @@ class PlannerContext:
         else:
             nextBook = self.nextBook if (self.nextChp > 1) else self.currentBook
             if self.nextChp > 1:
+                nextChp = self.nextChp - 1
+            else:
                 if self.nextBook == 'genesis':
                     nextChp = self.nextChp - 1
                 else:
                     nextChp = self.bible[self.currentBook]['chapters']
-            else:
-                nextChp = self.nextChp - 1
         return f"Today's reading is from {self.currentBook.title()} {self.currentChp} to {nextBook.title()} {nextChp}"
 
     def getTomorrowReading(self):
@@ -164,7 +164,9 @@ class PlannerContext:
 
     def setOffSet(self, timestamp):
         userTime = datetime.datetime.fromtimestamp(int(timestamp)/1000).time()
+        self.logger.info(f"user time is {userTime}")
         currentTime = datetime.datetime.now().time()
+        self.logger.info(f"current time is {currentTime}")
         offset = abs((datetime.timedelta(hours=currentTime.hour, minutes=currentTime.minute)
                      - datetime.timedelta(hours=userTime.hour, minutes=userTime.minute)).seconds)
         if currentTime > userTime:
