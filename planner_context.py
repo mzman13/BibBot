@@ -1,6 +1,6 @@
 import math
 import datetime
-from Bible import BibleManager
+from bible_manager import Bible
 
 
 class PlannerContext:
@@ -14,7 +14,7 @@ class PlannerContext:
         self.tempCurrentBook = None
         self.tempCurrentChp = None
         self.tempReadingRate = None
-        self.bible = BibleManager(getChrono=False).bible
+        self.bible = Bible(getChrono=False).bible
 
         self.userId = userId
         self.bot = messengerBot
@@ -191,7 +191,7 @@ class PlannerContext:
                    "3) Get tomorrow's reading\n" \
                    "4) Missed today's reading?\n" \
                    "5) Get end date\n" \
-                   "6) Set/Update a reminder\n" \
+                   "6) Set reminder\n" \
                    "7) Delete reminder\n" \
                    f"{eight} Tell me a random bible verse!\n"
         self.sendMessage(response)

@@ -2,7 +2,7 @@ import random
 
 
 # 1189 chapters
-class BibleManager:
+class Bible:
     def __init__(self, getChrono):
         if getChrono:
             self.bible = self.getChronoBible()

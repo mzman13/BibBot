@@ -1,7 +1,7 @@
 import os, time, logging, sys
 from flask import Flask, request
 from pymessenger.bot import Bot
-from Planner import Planner
+from planner import Planner
 
 
 app = Flask(__name__)
@@ -77,9 +77,8 @@ if __name__ == '__main__':
 # separate state for getting book, then chapter number
 # for yes/no questions, accepted answers are (yes, yup, sure, alright, ok, )
 # what if user enters option that can't be lowercase? lock is stuck and next message tries to acquire lock but timeouts
-# TODO: simplify menu by grouping similar options and add sub menus states
-# TODO: cancel / back tutorial?
-# TODO: separate states into own files
+# TODO?: simplify menu?
+# separate states into own files
 # TODO: timezone only works for US, add other timezone?
 # TODO: unit tests
 # TODO: option to read chronologically?
@@ -89,6 +88,7 @@ if __name__ == '__main__':
 #  why take so long to process first message? - usually when there is unprocessed message by user
 # TODO?: reward system for reading every day
 # TODO?: randomly get bible verse thru API
+# TODO?: cancel / back tutorial?
 """ 
 TODO: Test Cases: 
     today/tomorrowReading/endDate when plan not set?
