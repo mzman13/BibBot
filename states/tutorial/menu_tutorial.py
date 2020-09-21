@@ -22,8 +22,8 @@ class MenuTutorial(State):
             plannerContext.sendMessage("Please enter either 'menu' or 'help'")
 
         self.transitions = {
-            0: planner.menuTutorial,
-            1: planner.getTimeZoneTutorial,
-            2: planner.startPlanTutorial
+            0: planner.Planner.menuTutorial,
+            1: planner.Planner.getTimeZoneTutorial,
+            2: planner.Planner.startPlanTutorial
         }
         return State.next(self, returnCode)

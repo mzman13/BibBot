@@ -36,8 +36,8 @@ class PlanCreated(State):
             plannerContext.sendMessage(response)
 
         self.transitions = {
-            0: planner.menu,
-            1: planner.planCreated,
-            2: planner.setReminder
+            0: planner.Planner.menu,
+            1: planner.Planner.planCreated,
+            2: planner.Planner.setReminder
         }
         return State.next(self, returnCode)

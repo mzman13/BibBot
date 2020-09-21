@@ -30,9 +30,9 @@ class GetStartingChapter(State):
             returnCode = 1
 
         self.transitions = {
-            0: planner.startPlan,
-            1: planner.getStartingChapter,
-            2: planner.getReadingRate
+            0: planner.Planner.startPlan,
+            1: planner.Planner.getStartingChapter,
+            2: planner.Planner.getReadingRate
         }
         return State.next(self, returnCode)
 

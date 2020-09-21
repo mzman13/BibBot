@@ -18,7 +18,7 @@ class StartPlanTutorial(State):
             plannerContext.sendMessage(response)
 
         self.transitions = {
-            0: planner.startPlanTutorial,
-            1: planner.startPlan
+            0: planner.Planner.startPlanTutorial,
+            1: planner.Planner.startPlan
         }
         return State.next(self, returnCode)

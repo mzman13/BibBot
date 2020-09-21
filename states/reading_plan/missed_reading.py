@@ -40,7 +40,7 @@ class MissedReading(State):
             returnCode = 1
 
         self.transitions = {
-            0: planner.menu,
-            1: planner.missedReading
+            0: planner.Planner.menu,
+            1: planner.Planner.missedReading
         }
         return State.next(self, returnCode)

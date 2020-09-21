@@ -14,6 +14,6 @@ class Welcome(State):
     def next(self, event):
         message = event[0]
         self.transitions = {
-            message: planner.getTimeZoneTutorial
+            message: planner.Planner.getTimeZoneTutorial
         }
         return State.next(self, message)

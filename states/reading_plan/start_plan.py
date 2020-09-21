@@ -41,9 +41,9 @@ class StartPlan(State):
             returnCode = 1
 
         self.transitions = {
-            0: planner.menu,
-            1: planner.startPlan,
-            2: planner.getStartingChapter
+            0: planner.Planner.menu,
+            1: planner.Planner.startPlan,
+            2: planner.Planner.getStartingChapter
         }
         return State.next(self, returnCode)
 

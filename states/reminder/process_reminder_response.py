@@ -28,6 +28,6 @@ class ProcessReminderResponse(State):
 
         self.transitions = {
             0: self.previousState,
-            1: planner.processReminderResponse
+            1: planner.Planner.processReminderResponse
         }
         return State.next(self, returnCode)

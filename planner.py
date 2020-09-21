@@ -12,6 +12,25 @@ def checkYesMessage(message):
         return False
 
 class Planner(StateMachine):
+    welcome = Welcome()
+    menuTutorial = MenuTutorial()
+    startPlanTutorial = StartPlanTutorial()
+    getTimeZoneTutorial = GetTimeZoneTutorial()
+    menu = Menu()
+    startPlan = StartPlan()
+    getStartingChapter = GetStartingChapter()
+    getReadingRate = GetReadingRate()
+    planCreated = PlanCreated()
+    todayReading = TodayReading()
+    tomorrowReading = TomorrowReading()
+    endDate = EndDate()
+    missedReading = MissedReading()
+    getVerse = GetVerse()
+    setReminder = SetReminder()
+    deleteReminder = DeleteReminder()
+    processReminderResponse = ProcessReminderResponse()
+    getAmPm = GetAmPm()
+
     def __init__(self, messengerBot, userId, logger):
         """
         reminderEvent: threading event to signal when to stop the reminder thread
@@ -101,22 +120,3 @@ class Planner(StateMachine):
         finally:
             reminderEvent.clear()
             # self.plannerContext.logger.info(f"event cleared, killed thread {reminderEvent.is_set()}")
-
-Planner.welcome = Welcome()
-Planner.menuTutorial = MenuTutorial()
-Planner.startPlanTutorial = StartPlanTutorial()
-Planner.getTimeZoneTutorial = GetTimeZoneTutorial()
-Planner.menu = Menu()
-Planner.startPlan = StartPlan()
-Planner.getStartingChapter = GetStartingChapter()
-Planner.getReadingRate = GetReadingRate()
-Planner.planCreated = PlanCreated()
-Planner.todayReading = TodayReading()
-Planner.tomorrowReading = TomorrowReading()
-Planner.endDate = EndDate()
-Planner.missedReading = MissedReading()
-Planner.getVerse = GetVerse()
-Planner.setReminder = SetReminder()
-Planner.deleteReminder = DeleteReminder()
-Planner.processReminderResponse = ProcessReminderResponse()
-Planner.getAmPm = GetAmPm()

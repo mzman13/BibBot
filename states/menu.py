@@ -32,21 +32,21 @@ class Menu(State):
             returnCode = '8'
 
         self.transitions = {
-            '1': planner.startPlan,
-            '2': planner.todayReading,
-            '3': planner.tomorrowReading,
-            '4': planner.missedReading,
-            '5': planner.endDate,
-            '6': planner.setReminder,
-            '7': planner.deleteReminder,
-            '8': planner.getVerse,
-            'menu': planner.menu,
-            'help': planner.menu
+            '1': planner.Planner.startPlan,
+            '2': planner.Planner.todayReading,
+            '3': planner.Planner.tomorrowReading,
+            '4': planner.Planner.missedReading,
+            '5': planner.Planner.endDate,
+            '6': planner.Planner.setReminder,
+            '7': planner.Planner.deleteReminder,
+            '8': planner.Planner.getVerse,
+            'menu': planner.Planner.menu,
+            'help': planner.Planner.menu
         }
         if returnCode not in self.transitions:
             response = "Please select one of the menu options!"
             plannerContext.sendMessage(response)
             self.transitions = {
-                returnCode: planner.menu
+                returnCode: planner.Planner.menu
             }
         return State.next(self, returnCode)

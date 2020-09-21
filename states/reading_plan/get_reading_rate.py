@@ -35,8 +35,8 @@ class GetReadingRate(State):
             returnCode = 1
 
         self.transitions = {
-            0: planner.getStartingChapter,
-            1: planner.getReadingRate,
-            2: planner.planCreated
+            0: planner.Planner.getStartingChapter,
+            1: planner.Planner.getReadingRate,
+            2: planner.Planner.planCreated
         }
         return State.next(self, returnCode)
