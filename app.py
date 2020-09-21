@@ -37,12 +37,10 @@ def receive_message():
             messaging = event['messaging']
             for message in messaging:
                 if message.get('message'):
-                    logger.info(message)
                     # Facebook Messenger ID for user so we know where to send response back to
                     recipient_id = message['sender']['id']
                     if recipient_id not in users:
-                        logger.info(f"timestamp is {message['timestamp']}")
-                        users[recipient_id] = Planner(Bot(ACCESS_TOKEN), recipient_id, logger, message['timestamp'])
+                        users[recipient_id] = Planner(Bot(ACCESS_TOKEN), recipient_id, logger)
                     messageText = message['message'].get('text')
                     try:
                         users[recipient_id].process((messageText,))
@@ -79,6 +77,9 @@ if __name__ == '__main__':
 # separate state for getting book, then chapter number
 # for yes/no questions, accepted answers are (yes, yup, sure, alright, ok, )
 # what if user enters option that can't be lowercase? lock is stuck and next message tries to acquire lock but timeouts
+# TODO: simplify menu by grouping similar options and add sub menus states
+# TODO: cancel / back tutorial?
+# TODO: separate states into own files
 # TODO: unit tests
 # TODO: option to read chronologically?
 # TODO?: what if user reads more than daily amount?

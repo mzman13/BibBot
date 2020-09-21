@@ -41,7 +41,7 @@ class MenuTutorial(State):
             plannerContext.printMenu()
             response = "Great job!\nIf you ever need to see the menu, just type 'menu' or 'help'"
             plannerContext.sendMessage(response)
-            response = "Now, type in 1 to start a new reading plan"
+            response = "Next, tell me what timezone you're in (abbreviated)"
             returnCode = 1
         else:
             response = "Please enter either 'menu' or 'help'"
@@ -49,7 +49,32 @@ class MenuTutorial(State):
 
         self.transitions = {
             0: Planner.menuTutorial,
-            1: Planner.startPlanTutorial
+            1: Planner.getTimeZoneTutorial
+        }
+        return State.next(self, returnCode)
+
+class GetTimeZoneTutorial(State):
+    def run(self, event):
+        pass
+
+    def next(self, event):
+        message = event[0]
+        plannerContext = event[1]
+        returnCode = 0
+
+        if re.match(r"^[a-zA-z]{3}$", message):
+            if not plannerContext.setOffSet(message):
+                plannerContext.sendMessage("Sorry, I couldn't find your timezone!\nPlease try again")
+            else:
+                plannerContext.sendMessage("Thanks!")
+                plannerContext.sendMessage("Now, type in 1 to start a new reading plan")
+                returnCode = 1
+        else:
+            plannerContext.sendMessage("Sorry, I couldn't find your timezone!\nPlease try again")
+
+        self.transitions = {
+            0: Planner.getTimeZoneTutorial,
+            1: Planner.startPlanTutorial,
         }
         return State.next(self, returnCode)
 
@@ -108,7 +133,7 @@ class Menu(State):
             '3': Planner.tomorrowReading,
             '4': Planner.missedReading,
             '5': Planner.endDate,
-            '6': Planner.setReminder,
+            '6': Planner.getTimeZone,
             '7': Planner.deleteReminder,
             '8': Planner.getVerse,
             'menu': Planner.menu,
@@ -554,7 +579,7 @@ class ProcessReminderResponse(State):
         return State.next(self, returnCode)
 
 class Planner(StateMachine):
-    def __init__(self, messengerBot, userId, logger, timestamp):
+    def __init__(self, messengerBot, userId, logger):
         """
         reminderEvent: threading event to signal when to stop the reminder thread
         reminderLock: threading lock to make sure user finishes whatever state they're in before getting reminded
@@ -562,7 +587,7 @@ class Planner(StateMachine):
         StateMachine.__init__(self, Planner.welcome)
         self.reminderEvent = threading.Event()
         self.reminderLock = threading.Lock()
-        self.plannerContext = PlannerContext(messengerBot, userId, self.reminderEvent, logger, timestamp)
+        self.plannerContext = PlannerContext(messengerBot, userId, self.reminderEvent, logger)
 
     def process(self, event):
         if self.currentState != Planner.setReminder:
@@ -661,3 +686,4 @@ Planner.setReminder = SetReminder()
 Planner.deleteReminder = DeleteReminder()
 Planner.processReminderResponse = ProcessReminderResponse()
 Planner.getAmPm = GetAmPm()
+Planner.getTimeZoneTutorial = GetTimeZoneTutorial()

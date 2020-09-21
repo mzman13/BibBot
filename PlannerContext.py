@@ -4,7 +4,7 @@ from Bible import BibleManager
 
 
 class PlannerContext:
-    def __init__(self, messengerBot, userId, reminderEvent, logger, timestamp):
+    def __init__(self, messengerBot, userId, reminderEvent, logger):
         self.readingRate = None
         self.currentBook = None
         self.currentChp = None
@@ -23,7 +23,7 @@ class PlannerContext:
         self.reminderCreated = False
         self.reminderTime = None
         self.reminderEvent = reminderEvent
-        self.offset = self.setOffSet(timestamp)
+        self.offset = None
 
     def __str__(self):
         return f"{{reading rate: {self.readingRate}, " \
@@ -162,18 +162,18 @@ class PlannerContext:
     def setTempReminder(self, message):
         self.tempTime = message
 
-    def setOffSet(self, timestamp):
-        self.logger.info(f"timestamp context is {timestamp}")
-        userTime = datetime.datetime.fromtimestamp(int(timestamp)/1000).time()
-        self.logger.info(f"user time is {datetime.datetime.fromtimestamp(timestamp/1000)}")
-        currentTime = datetime.datetime.now().time()
-        self.logger.info(f"current time is {currentTime}")
-        offset = abs((datetime.timedelta(hours=currentTime.hour, minutes=currentTime.minute)
-                     - datetime.timedelta(hours=userTime.hour, minutes=userTime.minute)).seconds)
-        if currentTime > userTime:
-            return offset * -1
+    def setOffSet(self, timezone):
+        if timezone == 'est':
+            self.offset = 60 * 60 * -4
+        elif timezone == 'cst':
+            self.offset = 60 * 60 * -5
+        elif timezone == 'mst':
+            self.offset = 60 * 60 * -6
+        elif timezone == 'pst':
+            self.offset = 60 * 60 * -7
         else:
-            return offset
+            return False
+        return True
 
     def getOffSetTime(self, currentDateTime):
         # if utc time ahead of local time, subtract offset from utc time
