@@ -18,40 +18,15 @@ class Welcome(State):
         response = "Hi, I'm BibBot! Your personal bible reading assistant!\n" \
                    "I hope I can help you to read the bible every day :)\n\n"
         plannerContext.sendMessage(response)
-        response = "To start, type 'menu' or 'help' to see the menu"
+        response = "To start, tell me what timezone you're in (abbreviated)"
         plannerContext.sendMessage(response)
 
     def next(self, event):
         message = event[0]
         self.transitions = {
-            message: Planner.menuTutorial
+            message: Planner.getTimeZoneTutorial
         }
         return State.next(self, message)
-
-class MenuTutorial(State):
-    def run(self, event):
-        pass
-
-    def next(self, event):
-        message = event[0]
-        plannerContext = event[1]
-        returnCode = 0
-
-        if message in ('help', 'menu'):
-            plannerContext.printMenu()
-            response = "Great job!\nIf you ever need to see the menu, just type 'menu' or 'help'"
-            plannerContext.sendMessage(response)
-            response = "Next, tell me what timezone you're in (abbreviated)"
-            returnCode = 1
-        else:
-            response = "Please enter either 'menu' or 'help'"
-        plannerContext.sendMessage(response)
-
-        self.transitions = {
-            0: Planner.menuTutorial,
-            1: Planner.getTimeZoneTutorial
-        }
-        return State.next(self, returnCode)
 
 class GetTimeZoneTutorial(State):
     def run(self, event):
@@ -67,14 +42,39 @@ class GetTimeZoneTutorial(State):
                 plannerContext.sendMessage("Sorry, I couldn't find your timezone!\nPlease try again")
             else:
                 plannerContext.sendMessage("Thanks!")
-                plannerContext.sendMessage("Now, type in 1 to start a new reading plan")
+                plannerContext.sendMessage("Next, type 'menu' or 'help' to see the menu")
                 returnCode = 1
         else:
             plannerContext.sendMessage("Sorry, I couldn't find your timezone!\nPlease try again")
 
         self.transitions = {
             0: Planner.getTimeZoneTutorial,
-            1: Planner.startPlanTutorial,
+            1: Planner.menuTutorial,
+        }
+        return State.next(self, returnCode)
+
+class MenuTutorial(State):
+    def run(self, event):
+        pass
+
+    def next(self, event):
+        message = event[0]
+        plannerContext = event[1]
+        returnCode = 0
+
+        if message in ('help', 'menu'):
+            plannerContext.printMenu()
+            response = "Great job!\nIf you ever need to see the menu, just type 'menu' or 'help'"
+            plannerContext.sendMessage(response)
+            response = "Now, type in 1 to start a new reading plan"
+            returnCode = 1
+        else:
+            response = "Please enter either 'menu' or 'help'"
+        plannerContext.sendMessage(response)
+
+        self.transitions = {
+            0: Planner.menuTutorial,
+            1: Planner.startPlanTutorial
         }
         return State.next(self, returnCode)
 
@@ -133,7 +133,7 @@ class Menu(State):
             '3': Planner.tomorrowReading,
             '4': Planner.missedReading,
             '5': Planner.endDate,
-            '6': Planner.getTimeZone,
+            '6': Planner.setReminder,
             '7': Planner.deleteReminder,
             '8': Planner.getVerse,
             'menu': Planner.menu,

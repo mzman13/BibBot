@@ -80,6 +80,7 @@ if __name__ == '__main__':
 # TODO: simplify menu by grouping similar options and add sub menus states
 # TODO: cancel / back tutorial?
 # TODO: separate states into own files
+# TODO: timezone only works for US, add other timezone?
 # TODO: unit tests
 # TODO: option to read chronologically?
 # TODO?: what if user reads more than daily amount?
