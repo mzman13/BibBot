@@ -24,10 +24,10 @@ class Menu(State):
             returnCode = '4'
         elif re.match(r"^5\W?$", message) or message == 'five':
             returnCode = '5'
-        elif re.match(r"^6\W?$", message) or message == 'six':
-            returnCode = '6'
-        elif re.match(r"^7\W?$", message) or message == 'seven':
-            returnCode = '7'
+        # elif re.match(r"^6\W?$", message) or message == 'six':
+        #     returnCode = '6'
+        # elif re.match(r"^7\W?$", message) or message == 'seven':
+        #     returnCode = '7'
         elif re.match(r"^8\W?$", message) or message == 'eight':
             returnCode = '8'
 
@@ -37,8 +37,8 @@ class Menu(State):
             '3': planner.Planner.tomorrowReading,
             '4': planner.Planner.missedReading,
             '5': planner.Planner.endDate,
-            '6': planner.Planner.setReminder,
-            '7': planner.Planner.deleteReminder,
+            # '6': planner.Planner.setReminder,
+            # '7': planner.Planner.deleteReminder,
             '8': planner.Planner.getVerse,
             'menu': planner.Planner.menu,
             'help': planner.Planner.menu

@@ -1,10 +1,18 @@
-import os, time, logging, sys
+import os, time, logging, sys, json
 from flask import Flask, request
+from database import db
+from flask_heroku import Heroku
 from pymessenger.bot import Bot
+from UserReadingModel import UserReading
 from planner import Planner
 
 
 app = Flask(__name__)
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+heroku = Heroku(app)
+db.app = app    # init_app() doesn't set app
+db.init_app(app)
+
 ACCESS_TOKEN = os.environ['ACCESS_TOKEN']
 VERIFY_TOKEN = os.environ['VERIFY_TOKEN']
 users = {}
@@ -40,6 +48,9 @@ def receive_message():
                     # Facebook Messenger ID for user so we know where to send response back to
                     recipient_id = message['sender']['id']
                     if recipient_id not in users:
+                        if not UserReading.query.filter_by(userId=recipient_id).first():
+                            db.session.add(UserReading(recipient_id))
+                            db.session.commit()
                         users[recipient_id] = Planner(Bot(ACCESS_TOKEN), recipient_id, logger)
                     messageText = message['message'].get('text')
                     try:
@@ -55,7 +66,8 @@ def receive_message():
         return response
 
 if __name__ == '__main__':
-    app.run(debug=False, use_reloader=False)
+    # app.debug = True
+    app.run(use_reloader=False)
 
 # why state machine running startPlan.next() after startPlan.run() and waiting for input? - checking if next state is none runs next()
 # why sending multiple POST requests per message? - watermark post request
@@ -77,18 +89,20 @@ if __name__ == '__main__':
 # separate state for getting book, then chapter number
 # for yes/no questions, accepted answers are (yes, yup, sure, alright, ok, )
 # what if user enters option that can't be lowercase? lock is stuck and next message tries to acquire lock but timeouts
-# TODO?: simplify menu?
+# why take so long to process first message? - usually when there is unprocessed message by user
 # separate states into own files
-# TODO: timezone only works for US, add other timezone?
-# TODO: unit tests
-# TODO: option to read chronologically?
-# TODO?: what if user reads more than daily amount?
-# TODO?: option link facebook page
+# when creating new planner instance, check database if user exists and use reading plan data to create plannerContext
+# dont run welcome state if user reading plan data already exists
+# TODO: multiple users updating db? need lock?
 
-#  why take so long to process first message? - usually when there is unprocessed message by user
+# TODO?: simplify menu
+# TODO: timezone only works for US, add other timezones?
+# TODO: unit tests
+# TODO: option to read chronologically? - adds additional step
 # TODO?: reward system for reading every day
 # TODO?: randomly get bible verse thru API
 # TODO?: cancel / back tutorial?
+# TODO?: what if user reads more than daily amount?
 """ 
 TODO: Test Cases: 
     today/tomorrowReading/endDate when plan not set?

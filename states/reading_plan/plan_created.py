@@ -18,8 +18,9 @@ class PlanCreated(State):
             plannerContext.updateToday()
             response = f"Got it! The goal is to read {plannerContext.readingRate} chapters every day!\n\n{plannerContext.getTodayReading()}"
             plannerContext.sendMessage(response)
-        response = "Do you also want to set a reminder?"
-        plannerContext.sendMessage(response)
+        self.lastState = True
+        # response = "Do you also want to set a reminder?"
+        # plannerContext.sendMessage(response)
 
     def next(self, event):
         message = event[0]
@@ -28,16 +29,16 @@ class PlanCreated(State):
 
         if message in ('help', 'menu'):
             plannerContext.printMenu()
-            returnCode = 1
-        elif planner.checkYesMessage(message):
-            returnCode = 2
+            # returnCode = 1
+        # elif planner.checkYesMessage(message):
+        #     returnCode = 2
         else:
             response = "Finished creating plan"
             plannerContext.sendMessage(response)
 
         self.transitions = {
             0: planner.Planner.menu,
-            1: planner.Planner.planCreated,
-            2: planner.Planner.setReminder
+            1: planner.Planner.planCreated
+            # 2: planner.Planner.setReminder
         }
         return State.next(self, returnCode)

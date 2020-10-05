@@ -190,3 +190,9 @@ def getRandomVerse():
         "For God so loved the world, that he gave his one and only Son, so that whoever believes in him should not perish, but have eternal life. \n\nJohn 3:16"
     ]
     return random.choice(verses)
+
+"""
+fish spits jonah
+moses rebukes aaron, cow pops up
+judges - ehud
+"""

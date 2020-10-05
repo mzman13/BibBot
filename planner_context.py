@@ -1,16 +1,28 @@
 import math
 import datetime
 from bible_manager import Bible
+from UserReadingModel import UserReading
 
 
 class PlannerContext:
     def __init__(self, messengerBot, userId, reminderEvent, logger):
-        self.readingRate = None
-        self.currentBook = None
-        self.currentChp = None
-        self.nextBook = None
-        self.nextChp = None
-        self.today = None
+        userData = UserReading.query.filter_by(userId=userId).first()
+        if userData:
+            self.readingRate = userData.readingRate
+            self.currentBook = userData.currentBook
+            self.currentChp = userData.currentChp
+            self.nextBook = userData.nextBook
+            self.nextChp = userData.nextChp
+            self.today = userData.today
+            self.offset = userData.offset
+        else:
+            self.readingRate = None
+            self.currentBook = None
+            self.currentChp = None
+            self.nextBook = None
+            self.nextChp = None
+            self.today = None
+            self.offset = None
         self.tempCurrentBook = None
         self.tempCurrentChp = None
         self.tempReadingRate = None
@@ -23,7 +35,6 @@ class PlannerContext:
         self.reminderCreated = False
         self.reminderTime = None
         self.reminderEvent = reminderEvent
-        self.offset = None
 
     def __str__(self):
         return f"{{reading rate: {self.readingRate}, " \
@@ -51,6 +62,7 @@ class PlannerContext:
             self.currentBook = self.nextBook
             self.currentChp = self.nextChp
         self.nextBook, self.nextChp = self._calculateNext(self.currentBook, self.currentChp)
+        self.updateDB()
 
     def getTodayReading(self):
         if self.nextBook == 'done':
@@ -108,6 +120,7 @@ class PlannerContext:
         if self.nextChp > self.bible[self.currentBook]['chapters']:
             self.nextBook = self.bible[self.currentBook]['next']
             self.nextChp = self.nextChp % self.bible[self.currentBook]['chapters']
+        self.updateDB()
 
     def getEndDateRemainingChps(self):
         # add remaining chapters in current book and remaining books until revelation
@@ -173,6 +186,7 @@ class PlannerContext:
             self.offset = 60 * 60 * -7
         else:
             return False
+        self.updateDB()
         return True
 
     def getOffSetTime(self, currentDateTime):
@@ -191,7 +205,19 @@ class PlannerContext:
                    "3) Get tomorrow's reading\n" \
                    "4) Missed today's reading?\n" \
                    "5) Get end date\n" \
-                   "6) Set reminder\n" \
-                   "7) Delete reminder\n" \
                    f"{eight} Tell me a random bible verse!\n"
+                   # "6) Set reminder\n" \
+                   # "7) Delete reminder\n" \
         self.sendMessage(response)
+
+    def updateDB(self):
+        userData = UserReading.query.filter_by(userId=self.userId).first()
+        userData.readingRate = self.readingRate
+        userData.currentBook = self.currentBook
+        userData.currentChp = self.currentChp
+        userData.nextBook = self.nextBook
+        userData.nextChp = self.nextChp
+        userData.today = self.today
+        userData.offset = self.offset
+        from database import db
+        db.session.commit()

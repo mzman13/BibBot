@@ -3,6 +3,7 @@ from datetime import timedelta
 from StateMachine import StateMachine
 from planner_context import PlannerContext
 from states import *
+from UserReadingModel import UserReading
 
 
 def checkYesMessage(message):
@@ -36,14 +37,18 @@ class Planner(StateMachine):
         reminderEvent: threading event to signal when to stop the reminder thread
         reminderLock: threading lock to make sure user finishes whatever state they're in before getting reminded
         """
-        StateMachine.__init__(self, Planner.welcome)
+        userData = UserReading.query.filter_by(userId=userId).first()
+        if userData.nextBook:
+            StateMachine.__init__(self, Planner.menu)
+        else:
+            StateMachine.__init__(self, Planner.welcome)
         self.reminderEvent = threading.Event()
         self.reminderLock = threading.Lock()
         self.plannerContext = PlannerContext(messengerBot, userId, self.reminderEvent, logger)
 
     def process(self, event):
-        if self.currentState != Planner.setReminder:
-            self.reminderLock.acquire()
+        # if self.currentState != Planner.setReminder:
+        #     self.reminderLock.acquire()
 
         event = (self.getLowerMessage(event[0]), self.plannerContext,)
         # self.plannerContext.logger.info(f"Planner Before: message - {event[0]}, {self.plannerContext} in {threading.current_thread().name}")
@@ -54,10 +59,10 @@ class Planner(StateMachine):
         self.currentState.run(event)
         self.checkLastState()
         # self.plannerContext.logger.info(f"Planner After: message - {event[0]}, lastState - {self.currentState.lastState}, {self.plannerContext}")
-        self.checkSetReminderState()
+        # self.checkSetReminderState()
 
-        if self.reminderLock.locked():
-            self.reminderLock.release()
+        # if self.reminderLock.locked():
+        #     self.reminderLock.release()
 
     def getLowerMessage(self, m):
         try:
@@ -100,7 +105,6 @@ class Planner(StateMachine):
             return abs((timedelta(hours=reminder.hour, minutes=reminder.minute)
                         - timedelta(hours=offSetCurrent.hour, minutes=offSetCurrent.minute)).seconds) \
                         + 60
-
         try:
             sleepTime = calculateSleepTime(self.plannerContext, reminderTime, datetime.now())
             # self.plannerContext.logger.info(f'sleeping for {sleepTime} in {threading.current_thread().name}')
