@@ -14,7 +14,7 @@ class PlanCreated(State):
             plannerContext.nextChp = None
             plannerContext.readingRate = plannerContext.tempReadingRate
             plannerContext.today = plannerContext.getOffSetTime(datetime.now()).date()
-            plannerContext.setCurrentReading()
+            plannerContext.setCurrentReading(1)
             plannerContext.updateToday()
             response = f"Got it! The goal is to read {plannerContext.readingRate} chapters every day!\n\n{plannerContext.getTodayReading()}"
             plannerContext.sendMessage(response)
