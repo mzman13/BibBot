@@ -44,6 +44,7 @@ class PlannerContext:
 
     def updateToday(self):
         now = self.getOffSetTime(datetime.datetime.now()).date()
+        self.getUserData(self.userId)
         if self.today and now > self.today:
             daysPassed = self._calculateDaysPassed(now)
             self.today = now
