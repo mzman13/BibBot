@@ -93,7 +93,11 @@ if __name__ == '__main__':
 # separate states into own files
 # when creating new planner instance, check database if user exists and use reading plan data to create plannerContext
 # dont run welcome state if user reading plan data already exists
-# TODO: multiple users updating db? need lock?
+# TODO?: multiple users updating db? need lock?
+# thread to automatically update reading every night if user doesn't message every day.
+#       dont need thread, just calculate how many days missed and update when user asks for todays reading
+#       get data from db instead of memory if manual db update
+# TODO: create reminder thread every time on startup if reminder exists
 
 # TODO?: simplify menu
 # TODO: timezone only works for US, add other timezones?

@@ -6,23 +6,14 @@ from UserReadingModel import UserReading
 
 class PlannerContext:
     def __init__(self, messengerBot, userId, reminderEvent, logger):
-        userData = UserReading.query.filter_by(userId=userId).first()
-        if userData:
-            self.readingRate = userData.readingRate
-            self.currentBook = userData.currentBook
-            self.currentChp = userData.currentChp
-            self.nextBook = userData.nextBook
-            self.nextChp = userData.nextChp
-            self.today = userData.today
-            self.offset = userData.offset
-        else:
-            self.readingRate = None
-            self.currentBook = None
-            self.currentChp = None
-            self.nextBook = None
-            self.nextChp = None
-            self.today = None
-            self.offset = None
+        self.readingRate = None
+        self.currentBook = None
+        self.currentChp = None
+        self.nextBook = None
+        self.nextChp = None
+        self.today = None
+        self.offset = None
+        self.getUserData(userId)
         self.tempCurrentBook = None
         self.tempCurrentChp = None
         self.tempReadingRate = None
@@ -54,32 +45,36 @@ class PlannerContext:
     def updateToday(self):
         now = self.getOffSetTime(datetime.datetime.now()).date()
         if self.today and now > self.today:
+            daysPassed = self._calculateDaysPassed(now)
             self.today = now
-            self.setCurrentReading()
+            self.setCurrentReading(daysPassed)
 
-    def setCurrentReading(self):
-        if self.nextBook and self.nextChp:  # update current book/chp to be previous nextBook/Chp
-            self.currentBook = self.nextBook
-            self.currentChp = self.nextChp
-        self.nextBook, self.nextChp = self._calculateNext(self.currentBook, self.currentChp)
+    def _calculateDaysPassed(self, now):
+        return (now - self.today).days
+
+    def setCurrentReading(self, daysPassed):
+        for _ in range(daysPassed):
+            if self.nextBook and self.nextChp:  # update current book/chp to be previous nextBook/Chp
+                self.currentBook = self.nextBook
+                self.currentChp = self.nextChp
+            self.nextBook, self.nextChp = self._calculateNext(self.currentBook, self.currentChp)
         self.updateDB()
 
     def getTodayReading(self):
+        self.getUserData(self.userId)
         if self.nextBook == 'done':
             nextBook = 'revelation'
             nextChp = '22'
         else:
             nextBook = self.nextBook if (self.nextChp > 1) else self.currentBook
-            if self.nextChp > 1:
+            if self.nextChp > 1 or self.currentChp == 1:    # in case user reads 0 chps and on first chp of book
                 nextChp = self.nextChp - 1
             else:
-                if self.nextBook == 'genesis':
-                    nextChp = self.nextChp - 1
-                else:
-                    nextChp = self.bible[self.currentBook]['chapters']
+                nextChp = self.bible[self.currentBook]['chapters']
         return f"Today's reading is from {self.currentBook.title()} {self.currentChp} to {nextBook.title()} {nextChp}"
 
     def getTomorrowReading(self):
+        self.getUserData(self.userId)
         if self.nextBook == 'done':
             currentBook = self.currentBook
             currentChp = self.currentChp
@@ -115,6 +110,7 @@ class PlannerContext:
         return nextBook, nextChp
 
     def missedReading(self, chpsRead):
+        self.getUserData(self.userId)
         self.nextChp = self.currentChp + chpsRead
         self.nextBook = self.currentBook
         if self.nextChp > self.bible[self.currentBook]['chapters']:
@@ -124,7 +120,7 @@ class PlannerContext:
 
     def getEndDateRemainingChps(self):
         # add remaining chapters in current book and remaining books until revelation
-
+        self.getUserData(self.userId)
         remainingChps = 0
         foundNext = False
         for book, info in self.bible.items():
@@ -209,6 +205,17 @@ class PlannerContext:
                    # "6) Set reminder\n" \
                    # "7) Delete reminder\n" \
         self.sendMessage(response)
+
+    def getUserData(self, userId):
+        userData = UserReading.query.filter_by(userId=userId).first()
+        if userData:
+            self.readingRate = userData.readingRate
+            self.currentBook = userData.currentBook
+            self.currentChp = userData.currentChp
+            self.nextBook = userData.nextBook
+            self.nextChp = userData.nextChp
+            self.today = userData.today
+            self.offset = userData.offset
 
     def updateDB(self):
         userData = UserReading.query.filter_by(userId=self.userId).first()
