@@ -98,7 +98,7 @@ class PlannerContext:
             current = currentBook
             while True:
                 next = self.bible[current]['next']
-                if next == 'done' or self.bible[next]['chapters'] > total:
+                if next == 'done' or self.bible[next]['chapters'] >= total:
                     nextBook = next
                     nextChp = total
                     break
