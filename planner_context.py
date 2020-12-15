@@ -74,6 +74,7 @@ class PlannerContext:
                 nextChp = self.nextChp - 1
             else:
                 if self.bible[self.currentBook]['next'] != self.nextBook:
+                    nextBook = self.bible[self.currentBook]['next']
                     nextChp = self.bible[self.bible[self.currentBook]['next']]['chapters']
                 else:
                     nextChp = self.bible[self.currentBook]['chapters']
