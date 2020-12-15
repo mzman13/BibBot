@@ -67,11 +67,16 @@ class PlannerContext:
             nextBook = 'revelation'
             nextChp = '22'
         else:
+            # TODO: when self.nextChp = 1, and reading rate covers more than 1 book, then nextBook should be book before self.nextBook. need to add 'prev' key to bible_manager
+            # Ex: self.current = Colossians 4, self.next = 2 thessalonians 1. nextBook would = Colossians when it should be 1 Thessalonians
             nextBook = self.nextBook if (self.nextChp > 1) else self.currentBook
             if self.nextChp > 1 or self.currentChp == 1:    # in case user reads 0 chps and on first chp of book
                 nextChp = self.nextChp - 1
             else:
-                nextChp = self.bible[self.currentBook]['chapters']
+                if self.bible[self.currentBook]['next'] != self.nextBook:
+                    nextChp = self.bible[self.bible[self.currentBook]['next']]['chapters']
+                else:
+                    nextChp = self.bible[self.currentBook]['chapters']
         return f"Today's reading is from {self.currentBook.title()} {self.currentChp} to {nextBook.title()} {nextChp}"
 
     def getTomorrowReading(self):
